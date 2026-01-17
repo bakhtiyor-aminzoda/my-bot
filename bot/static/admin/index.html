@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amini Admin</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -46,6 +47,16 @@
                     <h2 id="active-orders">...</h2>
                 </div>
             </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="chart-section"
+            style="margin-bottom: 32px; background: var(--tg-theme-bg-color); padding: 16px; border-radius: 20px; box-shadow: var(--shadow-soft);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0; font-size:18px;">Динамика заказов</h3>
+                <span style="font-size:12px; color:var(--tg-theme-hint-color);">7 дней</span>
+            </div>
+            <canvas id="ordersChart" width="400" height="200"></canvas>
         </section>
 
         <!-- Calendar / Recent Orders -->
