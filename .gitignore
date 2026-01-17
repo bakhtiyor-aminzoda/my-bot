@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Project specific secrets
+bot/credentials.json
+credentials.json
+
+# MacOS
+.DS_Store

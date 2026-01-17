@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      # Mount credentials if you want to update them without rebuilding
+      - ./bot/credentials.json:/app/bot/credentials.json
+      # Mount the database if we had one
+      # - ./data:/app/data
+    environment:
+      # You can override env vars here
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ADMIN_ID=${ADMIN_ID}
+      - SPREADSHEET_ID=${SPREADSHEET_ID}

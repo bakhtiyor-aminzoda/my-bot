@@ -1,0 +1,363 @@
+from aiogram import Router, F, types
+from aiogram.filters import CommandStart, Command
+from aiogram.fsm.context import FSMContext
+from bot.states import Application
+from bot.config import ADMIN_ID, ADMIN_USERNAME
+from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb
+
+router = Router()
+
+# --- Content Data ---
+SERVICES_INFO = {
+    "shops": (
+        "🛍 <b>Магазины в Telegram</b>\n\n"
+        "Магазин в Telegram — это не просто каталог. Это продавец, который не спит, не грубит и не путает заказы.\n\n"
+        "<b>Как это работает:</b>\n"
+        "• Клиент выбирает товары так же просто, как пишет сообщение.\n"
+        "• Корзина собирается сама.\n"
+        "• Оплата проходит за секунды.\n\n"
+        "<b>Итог:</b> Клиент нажимает кнопки — вы получаете деньги и уведомление. Без лишних переписок."
+    ),
+    "booking": (
+        "📅 <b>Запись клиентов</b>\n\n"
+        "Забудьте про фразы: <i>«А есть окошко на 15:00?» — «Нет, только на 17:30».</i>\n\n"
+        "<b>Система берет это на себя:</b>\n"
+        "• Клиент видит свободное время и записывается сам.\n"
+        "• Бот напоминает о визите (снижаем неявку).\n"
+        "• Вы видите полное расписание.\n\n"
+        "Идеально для барбершопов, салонов красоты, врачей и консультантов."
+    ),
+    "support": (
+        "🤖 <b>Чат-боты поддержки</b>\n\n"
+        "80% вопросов клиентов одинаковые: «Где вы находитесь?», «Сколько стоит?», «Как заказать?».\n\n"
+        "<b>Зачем тратить на это жизнь?</b>\n"
+        "Умный бот ответит мгновенно, в любое время суток.\n\n"
+        "А если вопрос сложный — он позовет живого человека. Разгрузите себя и команду."
+    )
+}
+
+ABOUT_TEXT = (
+    "👨‍💻 <b>Обо мне / Опыт</b>\n\n"
+    "Меня зовут <b>Бахтиёр</b>.\n"
+    "Я тот человек, который любит порядок там, где обычно хаос.\n\n"
+    "• <b>5 лет в банковской сфере.</b>\n"
+    "• <b>3+ года в FinTech (Alif).</b> Прошел путь от Tech Support до Project Manager.\n\n"
+    "Я знаю, как важна каждая заявка и как больно терять клиента из-за долгого ответа.\n"
+    "Поэтому я не «пишу код», а <b>строю систему продаж и сервиса</b> для вашего бизнеса."
+)
+
+HOW_IT_WORKS_TEXT = (
+    "ℹ️ <b>Как я работаю</b>\n\n"
+    "1. Обсуждаем задачу\n"
+    "2. Я предлагаю решение\n"
+    "3. Настраиваю бота\n"
+    "4. Передаю готовый результат\n\n"
+    "Никакой автоматической продажи. Всё обсуждаем лично."
+)
+
+# --- Navigation Handlers ---
+
+from aiogram.types import FSInputFile
+import os
+
+@router.message(CommandStart())
+async def cmd_start(message: types.Message, state: FSMContext):
+    """Entry point: Shows Main Menu."""
+    await state.clear()
+    
+    caption_text = (
+        f"**Привет, это Бахтиёр.** 👋\n\n"
+        "Начал карьеру в 17 лет. За плечами 5 лет в банковской сфере, "
+        "из них 3+ года в финтехе (Alif) на позициях IT Project Manager и Tech Support.\n\n"
+        "Сейчас я работаю с бизнесом, у которого **клиентов хватает, а порядка в заявках нет**.\n\n"
+        "Сразу обозначу позицию:\n"
+        "❌ Я не просто «делаю ботов».\n"
+        "❌ Я не продаю автоматизацию ради галочки.\n\n"
+        "✅ **Я выстраиваю систему.**\n"
+        "Мой опыт в проектах и поддержке научил меня одному: любой хаос можно превратить в четкий процесс.\n\n"
+        "Переписка – плохой инструмент для учета. Заявки теряются, клиенты забываются.\n"
+        "Я беру это на себя. **Спокойно. По шагам. Под вашу задачу.**\n\n"
+        "Вам нужно не «красиво», а **понятно и прибыльно**?\n"
+        "Тогда вы по адресу. Выберите вариант ниже 👇"
+    )
+    
+    # Try to load photo from project root or bot folder
+    # Priority: bot/my-photo.jpeg (files found check)
+    photo_path = None
+    possible_paths = [
+        "bot/my-photo.jpeg", "my-photo.jpeg",
+        "bot/my-photo.jpg", "my-photo.jpg",
+        "bot/my-photo.png", "my-photo.png"
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            photo_path = path
+            break
+         
+    if photo_path:
+        photo = FSInputFile(photo_path)
+        await message.answer_photo(
+            photo=photo,
+            caption=caption_text,
+            reply_markup=main_menu_kb(),
+            parse_mode="Markdown"
+        )
+    else:
+        # Fallback if photo not found
+        await message.answer(
+            caption_text,
+            reply_markup=main_menu_kb(),
+            parse_mode="Markdown"
+        )
+
+@router.message(Command("cancel"))
+async def cmd_cancel(message: types.Message, state: FSMContext):
+    """Global cancel command."""
+    await state.clear()
+    await message.answer(
+        "Действие отменено. 🚫\nВозвращаемся в меню.",
+        reply_markup=main_menu_kb()
+    )
+
+@router.callback_query(F.data == "nav_services")
+async def nav_services(callback: types.CallbackQuery):
+    text = (
+        "🛠 <b>Услуги</b>\n\n"
+        "Выберите категорию, чтобы узнать подробнее:"
+    )
+    
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=services_kb(), parse_mode="HTML")
+    else:
+        await callback.message.edit_text(text, reply_markup=services_kb(), parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "nav_about")
+async def nav_about(callback: types.CallbackQuery):
+    kb = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton(text="🔙 Назад", callback_data="nav_back_main")]])
+    
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(ABOUT_TEXT, reply_markup=kb, parse_mode="HTML")
+    else:
+        await callback.message.edit_text(ABOUT_TEXT, reply_markup=kb, parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "nav_back_main")
+async def nav_back_main(callback: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    
+    text = (
+        "🏠 <b>Главное меню</b>\n\n"
+        "Мы остановились на выборе решения.\n"
+        "Куда перейдем дальше? 👇\n\n"
+        "• <b>Услуги</b> — Готовые решения для бизнеса\n"
+        "• <b>Обо мне</b> — Опыт и подход к работе\n"
+        "• <b>Заявка</b> — Обсудить индивидуальный проект"
+    )
+    
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=main_menu_kb(), parse_mode="HTML")
+    else:
+        await callback.message.edit_text(text, reply_markup=main_menu_kb(), parse_mode="HTML")
+    await callback.answer()
+
+@router.callback_query(F.data == "nav_back_services")
+async def nav_back_services(callback: types.CallbackQuery):
+    await callback.message.edit_text(
+        "🛠 <b>Услуги</b>\n\n"
+        "Выберите категорию:",
+        reply_markup=services_kb(),
+        parse_mode="HTML"
+    )
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("cat_"))
+async def show_category_detail(callback: types.CallbackQuery):
+    cat_id = callback.data.split("_")[1]
+    info = SERVICES_INFO.get(cat_id, "Информация отсутствует.")
+    await callback.message.edit_text(
+        info,
+        reply_markup=service_detail_kb(cat_id),
+        parse_mode="HTML"
+    )
+    await callback.answer()
+
+# --- Application Flow Starters ---
+
+@router.callback_query(F.data == "new_application")
+async def start_application_direct(callback: types.CallbackQuery, state: FSMContext):
+    await _start_fsm(callback.message, state)
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("order_"))
+async def start_application_order(callback: types.CallbackQuery, state: FSMContext):
+    service_id = callback.data.split("_")[1]
+    # Map id to human readable name
+    service_names = {
+        "shops": "Интернет-магазин",
+        "booking": "Запись клиентов",
+        "support": "Чат-бот поддержки"
+    }
+    context_name = service_names.get(service_id, "Разработка бота")
+    
+    # Save context to state data
+    await state.update_data(service_context=context_name)
+    
+    await _start_fsm(callback.message, state, context_name)
+    await callback.answer()
+
+async def _start_fsm(message: types.Message, state: FSMContext, context: str = None):
+    """
+    Helper to start the FSM flow.
+    """
+    await state.set_state(Application.name)
+    
+    if context:
+        text = f"Вы выбрали: <b>{context}</b>. Отличный выбор! 🔥\nДавайте познакомимся. Как вас зовут?"
+    else:
+        text = "Отлично! Давайте обсудим детали.\nКак вас зовут?"
+        
+    await message.answer(text, reply_markup=types.ReplyKeyboardRemove(), parse_mode="HTML")
+
+# --- FSM Handlers ---
+
+@router.message(Application.name)
+async def process_name(message: types.Message, state: FSMContext):
+    if not message.text:
+        await message.answer("Пожалуйста, введите ваше имя текстом.")
+        return
+        
+    await state.update_data(name=message.text)
+    await state.set_state(Application.business_type)
+    
+    # Quick replies for Business Type
+    kb_buttons = [
+        [types.KeyboardButton(text="🛒 Магазин"), types.KeyboardButton(text="✂️ Услуги / Салон")],
+        [types.KeyboardButton(text="🍔 Кафе / Ресторан"), types.KeyboardButton(text="👨‍🏫 Обучение")],
+        [types.KeyboardButton(text="Другое")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb_buttons, resize_keyboard=True, one_time_keyboard=True)
+    
+    await message.answer("Какой у вас бизнес?", reply_markup=keyboard)
+
+@router.message(Application.business_type)
+async def process_business_type(message: types.Message, state: FSMContext):
+    if not message.text:
+        await message.answer("Пожалуйста, напишите вид деятельности текстом.")
+        return
+        
+    await state.update_data(business_type=message.text)
+    await state.set_state(Application.task_description)
+    
+    await message.answer(
+        "Что именно вы хотите автоматизировать?\n\n"
+        "<i>Например:</i>\n"
+        "— Прием заказов и оплату\n"
+        "— Рассылку по базе клиентов\n"
+        "— Ответы на частые вопросы\n"
+        "— Запись на прием",
+        reply_markup=types.ReplyKeyboardRemove(),
+        parse_mode="HTML"
+    )
+
+@router.message(Application.task_description)
+async def process_task_description(message: types.Message, state: FSMContext):
+    if not message.text:
+        await message.answer("Пожалуйста, опишите задачу текстом.")
+        return
+
+    await state.update_data(task_description=message.text)
+    await state.set_state(Application.contact_info)
+    
+    # Request Contact Keyboard
+    kb = [[types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)]]
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    
+    await message.answer(
+        "Как с вами удобнее связаться?\n"
+        "Нажмите кнопку ниже, чтобы отправить номер телефона, или напишите его вручную.",
+        reply_markup=keyboard
+    )
+
+@router.message(Application.contact_info)
+async def process_contact_info(message: types.Message, state: FSMContext):
+    contact_info = ""
+    if message.contact:
+        contact_info = message.contact.phone_number
+    elif message.text:
+        contact_info = message.text
+    else:
+        await message.answer("Пожалуйста, отправьте номер телефона через кнопку или напишите текстом.")
+        return
+
+    await state.update_data(contact_info=contact_info)
+    
+    data = await state.get_data()
+    user = message.from_user
+    username = f"@{user.username}" if user.username else "нет username"
+    
+    # Check if there is a service context
+    service_context = data.get("service_context", "Общая заявка")
+    
+    # Notify Admin
+    summary = (
+        f"🔔 <b>Новая заявка: {service_context}</b> #lead\n\n"
+        f"👤 <b>Имя:</b> {data['name']}\n"
+        f"🏢 <b>Бизнес:</b> {data['business_type']}\n"
+        f"📝 <b>Задача:</b> {data['task_description']}\n"
+        f"📞 <b>Контакт:</b> {contact_info}\n"
+        f"🔗 <b>Telegram:</b> {username} (<a href='tg://user?id={user.id}'>профиль</a>)"
+    )
+    
+    # Save to Google Sheets
+    # We pass the full data dict, adding context manually if it's not in there perfectly, 
+    # but currently context IS in data.
+    from bot.sheets import add_lead
+    # Run in background or await if async? gspread is sync usually. 
+    # For a simple bot, sync call is okay, or we can wrap it. 
+    # To avoid blocking, in production we'd use threadpool or async gspread, 
+    # but for now let's just call it inside a try/except block to not block errors.
+    try:
+         add_lead(data)
+    except Exception as e:
+         print(f"Sheet error: {e}")
+    
+    try:
+        await message.bot.send_message(chat_id=ADMIN_ID, text=summary, parse_mode="HTML")
+    except Exception as e:
+        print(f"Failed to send admin notification: {e}")
+        
+    # Notify User & Show Post-Submit Menu
+    await state.set_state(Application.submitted)
+    await message.answer(
+        "Спасибо! Я получил заявку и напишу вам лично.",
+        reply_markup=types.ReplyKeyboardRemove()
+    )
+    await message.answer(
+        "Заявка отправлена! ✅\n"
+        "Вы можете вернуться в меню или оставить еще одну.",
+        reply_markup=post_submit_kb()
+    )
+
+# --- Post-Submit & Misc Handlers ---
+
+@router.callback_query(F.data == "how_it_works")
+async def cb_how_it_works(callback: types.CallbackQuery):
+    await callback.message.answer(HOW_IT_WORKS_TEXT, parse_mode="HTML")
+    await callback.message.answer("Что делаем дальше?", reply_markup=post_submit_kb())
+    await callback.answer()
+
+@router.message(Application.submitted)
+async def process_submitted_message(message: types.Message):
+    await message.answer(
+        "Я уже получил вашу заявку 👍\n"
+        "Я напишу вам лично.\n\n"
+        "Если хотите:\n"
+        "— можете оставить ещё одну заявку\n"
+        "— или посмотреть, как я работаю",
+        reply_markup=post_submit_kb()
+    )
