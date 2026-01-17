@@ -9,5 +9,8 @@ venv/
 bot/credentials.json
 credentials.json
 
+# Project specific assets
+instagram_assets/
+
 # MacOS
 .DS_Store
