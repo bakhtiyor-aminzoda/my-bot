@@ -23,8 +23,12 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 .container {
-    max-width: 600px;
+    padding: 20px;
     margin: 0 auto;
     padding-bottom: 40px;
 }
@@ -245,10 +249,13 @@ h2 {
     width: 90%;
     max-width: 420px;
     border-radius: 28px;
-    padding: 32px;
+    padding: 24px;
+    /* Reduced padding for mobile */
     box-shadow: var(--shadow-lg);
     transform: translateY(40px) scale(0.95);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: auto;
+    /* Center it */
 }
 
 .modal-overlay.active .modal-card {
