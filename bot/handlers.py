@@ -135,6 +135,24 @@ async def cmd_cancel(message: types.Message, state: FSMContext):
         reply_markup=main_menu_kb()
     )
 
+@router.message(Command("stats"))
+async def cmd_stats(message: types.Message):
+    """Admin command: Show bot statistics."""
+    # Check if user is admin
+    if message.from_user.id != ADMIN_ID:
+        # Silently ignore or say unknown command
+        return
+
+    from bot.database import count_users
+    total_users = await count_users()
+    
+    await message.answer(
+        f"📊 <b>Статистика Бота</b>\n\n"
+        f"👥 <b>Пользователей:</b> {total_users}\n"
+        f"📅 <b>Дата запуска:</b> 17.06.2024",
+        parse_mode="HTML"
+    )
+
 @router.callback_query(F.data == "nav_services")
 async def nav_services(callback: types.CallbackQuery):
     text = (

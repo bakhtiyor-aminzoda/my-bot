@@ -74,6 +74,13 @@ async def get_all_users():
         result = await session.execute(select(User.id))
         return result.scalars().all()
 
+async def count_users():
+    """Returns the total number of users."""
+    async with AsyncSessionLocal() as session:
+        # Optimized count query
+        result = await session.execute(select(User.id))
+        return len(result.scalars().all())
+
 async def add_message(user_id: int, role: str, content: str):
     """Saves a message to history."""
     async with AsyncSessionLocal() as session:
