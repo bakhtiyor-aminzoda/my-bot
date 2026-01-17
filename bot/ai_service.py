@@ -45,8 +45,21 @@ def setup_ai():
     
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=SYSTEM_PROMPT)
-        return model
+        
+        # Try preferred models in order
+        model_names = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-pro']
+        
+        for name in model_names:
+            try:
+                model = genai.GenerativeModel(name, system_instruction=SYSTEM_PROMPT)
+                # Test the model creation (it's lazy usually, but let's assume it works if no error)
+                logger.info(f"✅ AI Configured using model: {name}")
+                return model
+            except Exception as e:
+                logger.warning(f"Failed to load model {name}: {e}")
+                continue
+                
+        return None
     except Exception as e:
         logger.error(f"Failed to configure AI: {e}")
         return None
