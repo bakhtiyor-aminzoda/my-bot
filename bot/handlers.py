@@ -305,7 +305,7 @@ async def _start_fsm(message: types.Message, state: FSMContext, context: str = N
     """
     Helper to start the FSM flow.
     """
-    await state.set_state(Application.name)
+    await state.set_state(ApplicationState.name)
     
     prefix = "🚀 <b>Шаг 1 из 5</b>\n\n"
     if context:
@@ -315,14 +315,14 @@ async def _start_fsm(message: types.Message, state: FSMContext, context: str = N
         
     await message.answer(text, reply_markup=types.ReplyKeyboardRemove(), parse_mode="HTML")
 
-@router.message(Application.name)
+@router.message(ApplicationState.name)
 async def process_name(message: types.Message, state: FSMContext):
     if not message.text:
         await message.answer("Пожалуйста, введите ваше имя текстом.")
         return
         
     await state.update_data(name=message.text)
-    await state.set_state(Application.business_type)
+    await state.set_state(ApplicationState.business_type)
     
     # Quick replies for Business Type
     kb_buttons = [
@@ -334,14 +334,14 @@ async def process_name(message: types.Message, state: FSMContext):
     
     await message.answer("🏢 <b>Шаг 2 из 5</b>\n\nКакой у вас бизнес?", reply_markup=keyboard, parse_mode="HTML")
 
-@router.message(Application.business_type)
+@router.message(ApplicationState.business_type)
 async def process_business_type(message: types.Message, state: FSMContext):
     if not message.text:
         await message.answer("Пожалуйста, напишите вид деятельности текстом.")
         return
         
     await state.update_data(business_type=message.text)
-    await state.set_state(Application.budget)
+    await state.set_state(ApplicationState.budget)
     
     await message.answer(
         "💰 <b>Шаг 3 из 5</b>\n\n"
@@ -350,7 +350,7 @@ async def process_business_type(message: types.Message, state: FSMContext):
         parse_mode="HTML"
     )
 
-@router.callback_query(Application.budget) # Budget is chosen via Inline Buttons
+@router.callback_query(ApplicationState.budget) # Budget is chosen via Inline Buttons
 async def process_budget(callback: types.CallbackQuery, state: FSMContext):
     # Map callback data to readable text
     budget_map = {
@@ -361,7 +361,7 @@ async def process_budget(callback: types.CallbackQuery, state: FSMContext):
     selected_budget = budget_map.get(callback.data, callback.data)
     
     await state.update_data(budget=selected_budget)
-    await state.set_state(Application.task_description)
+    await state.set_state(ApplicationState.task_description)
     
     await callback.message.edit_text(
         f"✅ Бюджет: {selected_budget}\n\n"
@@ -372,14 +372,14 @@ async def process_budget(callback: types.CallbackQuery, state: FSMContext):
     )
     await callback.answer()
 
-@router.message(Application.task_description)
+@router.message(ApplicationState.task_description)
 async def process_task_description(message: types.Message, state: FSMContext):
     if not message.text:
         await message.answer("Пожалуйста, опишите задачу текстом.")
         return
 
     await state.update_data(task_description=message.text)
-    await state.set_state(Application.contact_info)
+    await state.set_state(ApplicationState.contact_info)
     
     # Request Contact Keyboard
     kb = [[types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)]]
@@ -393,14 +393,14 @@ async def process_task_description(message: types.Message, state: FSMContext):
         parse_mode="HTML"
     )
 
-@router.message(Application.task_description)
+@router.message(ApplicationState.task_description)
 async def process_task_description(message: types.Message, state: FSMContext):
     if not message.text:
         await message.answer("Пожалуйста, опишите задачу текстом.")
         return
 
     await state.update_data(task_description=message.text)
-    await state.set_state(Application.contact_info)
+    await state.set_state(ApplicationState.contact_info)
     
     # Request Contact Keyboard
     kb = [[types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)]]
@@ -412,7 +412,7 @@ async def process_task_description(message: types.Message, state: FSMContext):
         reply_markup=keyboard
     )
 
-@router.message(Application.contact_info)
+@router.message(ApplicationState.contact_info)
 async def process_contact_info(message: types.Message, state: FSMContext):
     contact_info = ""
     if message.contact:
@@ -471,7 +471,7 @@ async def process_contact_info(message: types.Message, state: FSMContext):
         print(f"Failed to send admin notification: {e}")
         
     # Notify User & Show Post-Submit Menu
-    await state.set_state(Application.submitted)
+    await state.set_state(ApplicationState.submitted)
     await message.answer(
         "Спасибо! Я получил заявку и напишу вам лично.",
         reply_markup=types.ReplyKeyboardRemove()
@@ -505,7 +505,7 @@ async def cb_how_it_works(callback: types.CallbackQuery):
     await callback.message.answer("Что делаем дальше?", reply_markup=post_submit_kb())
     await callback.answer()
 
-@router.message(Application.submitted)
+@router.message(ApplicationState.submitted)
 async def process_submitted_message(message: types.Message):
     await message.answer(
         "Я уже получил вашу заявку 👍\n"
