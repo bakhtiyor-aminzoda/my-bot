@@ -50,13 +50,14 @@
         </section>
 
         <!-- Chart Section -->
-        <section class="chart-section"
-            style="margin-bottom: 32px; background: var(--tg-theme-bg-color); padding: 16px; border-radius: 20px; box-shadow: var(--shadow-soft);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="margin:0; font-size:18px;">Динамика заказов</h3>
-                <span style="font-size:12px; color:var(--tg-theme-hint-color);">7 дней</span>
+        <section class="chart-card">
+            <div class="chart-header">
+                <h3>Динамика заказов</h3>
+                <span class="chart-period">7 дней</span>
             </div>
-            <canvas id="ordersChart" width="400" height="200"></canvas>
+            <div style="position: relative; height: 200px; width: 100%">
+                <canvas id="ordersChart"></canvas>
+            </div>
         </section>
 
         <!-- Calendar / Recent Orders -->

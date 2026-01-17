@@ -43,6 +43,11 @@ async function fetchStats() {
 function renderChart(chartData) {
     const ctx = document.getElementById('ordersChart').getContext('2d');
 
+    // Create Gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(0, 122, 255, 0.4)');
+    gradient.addColorStop(1, 'rgba(0, 122, 255, 0)');
+
     if (chartInstance) chartInstance.destroy(); // Prevent duplicates
 
     chartInstance = new Chart(ctx, {
@@ -52,24 +57,51 @@ function renderChart(chartData) {
             datasets: [{
                 label: 'Заказы',
                 data: chartData.data,
-                borderColor: '#007AFF',
-                backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                borderColor: '#007AFF', // Telegram Blue
+                backgroundColor: gradient,
                 borderWidth: 3,
-                tension: 0.4,
+                tension: 0.4, // Smooth curves
                 fill: true,
-                pointRadius: 4,
-                pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#007AFF',
-                pointBorderWidth: 2
+                pointRadius: 0, // Clean look, show on hover
+                pointHoverRadius: 6,
+                pointHitRadius: 20
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleFont: { family: 'Inter', size: 13 },
+                    bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
             scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { precision: 0 } },
-                x: { grid: { display: false } }
-            }
+                y: {
+                    beginAtZero: true,
+                    grid: { display: false }, // Cleaner
+                    ticks: { display: false } // Minimal
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { family: 'Inter', size: 11 },
+                        color: '#8e8e93',
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 5
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
         }
     });
 }

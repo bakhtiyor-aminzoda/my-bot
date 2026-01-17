@@ -134,6 +134,41 @@ h2 {
     letter-spacing: -0.5px;
 }
 
+/* Chart Card */
+.chart-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    margin-bottom: 40px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chart-period {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
 /* Bookings List */
 .section-header {
     display: flex;
