@@ -1,0 +1,24 @@
+# Exclude Version Control
+.git
+.gitignore
+
+# Exclude Local Environment
+venv/
+.env
+.DS_Store
+
+# Exclude Bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Exclude Artifacts
+bot/images/
+sales_scripts.md
+ai_server_specs.md
+visual_strategy_guide.md
+instagram_assets/
+
+# Exclude Documentation
+README.md
+task.md
