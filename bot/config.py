@@ -6,8 +6,7 @@ load_dotenv()
 
 # Bot Token from @BotFather
 # In production, use os.getenv("BOT_TOKEN")
-# For demo purposes, you can also paste it here directly, but strictly recommended to use .env
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8478672514:AAGupR9_ymf7YARUhcMgnKq31ES_84hC9HE")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Admin ID who receives the leads
 # You can find your ID via bots like @userinfobot
@@ -22,10 +21,10 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 
 # Google Sheets Config
 GOOGLE_KEY_FILE = os.getenv("GOOGLE_KEY_FILE", "bot/credentials.json")
-SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "1o__PnwD7IE60SchAz4eV1PEAhBG5rbeJ_SAlC0Gg9zs") 
+SPREADSHEET_ID = os.getenv("SPREADSHEET_ID") 
 
 # AI Config
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDfSCzhIuhP05JWu-d6sqwNEejZbjGb8IQ")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
     print("WARNING: BOT_TOKEN is not set in config.py or .env")
