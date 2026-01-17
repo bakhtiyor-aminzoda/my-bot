@@ -47,18 +47,33 @@ def setup_ai():
         genai.configure(api_key=GEMINI_API_KEY)
         
         # Try preferred models in order
-        model_names = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-pro']
+        model_names = [
+            'gemini-1.5-flash', 
+            'gemini-1.5-flash-001',
+            'gemini-1.5-pro',
+            'gemini-1.0-pro', 
+            'gemini-pro'
+        ]
         
         for name in model_names:
             try:
+                # Note: 'system_instruction' is supported in newer versions (we have 0.8.6)
+                # But some older models might reject it or the API endpoint might vary.
+                # We try with it first.
                 model = genai.GenerativeModel(name, system_instruction=SYSTEM_PROMPT)
-                # Test the model creation (it's lazy usually, but let's assume it works if no error)
-                logger.info(f"✅ AI Configured using model: {name}")
+                
+                # CRITICAL: Test the model immediately. 
+                # The constructor is lazy and won't throw 404. We must generate something.
+                logger.info(f"Testing model: {name}...")
+                model.generate_content("Test")
+                
+                logger.info(f"✅ AI Successfully configured using: {name}")
                 return model
             except Exception as e:
-                logger.warning(f"Failed to load model {name}: {e}")
+                logger.warning(f"❌ Model {name} failed: {e}")
                 continue
-                
+        
+        logger.error("❌ All AI models failed to initialize.")
         return None
     except Exception as e:
         logger.error(f"Failed to configure AI: {e}")
