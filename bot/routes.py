@@ -1,5 +1,5 @@
 from aiohttp import web
-from bot.api import get_dashboard_stats, get_bookings_list, health_check
+from bot.api import get_dashboard_stats, get_bookings_list, health_check, get_order_details, update_order_status
 
 def setup_routes(app: web.Application):
     """
@@ -8,6 +8,8 @@ def setup_routes(app: web.Application):
     # API endpoints for Pocket CRM
     app.router.add_get("/api/stats", get_dashboard_stats)
     app.router.add_get("/api/bookings", get_bookings_list)
+    app.router.add_get("/api/orders/{id}", get_order_details)
+    app.router.add_post("/api/orders/{id}/status", update_order_status)
     
     # Health check (useful for Render/Uptime monitors)
     app.router.add_get("/health", health_check)
