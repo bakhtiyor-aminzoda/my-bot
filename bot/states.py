@@ -1,6 +1,6 @@
 from aiogram.fsm.state import State, StatesGroup
 
-class Application(StatesGroup):
+class ApplicationState(StatesGroup):
     """
     FSM States for the Application flow.
     """
