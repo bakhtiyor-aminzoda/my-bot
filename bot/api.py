@@ -1,6 +1,5 @@
 from aiohttp import web
-from bot.database import count_users, get_all_bookings
-from datetime import datetime
+from bot.database import count_users, get_recent_orders, count_orders
 
 async def get_dashboard_stats(request):
     """
@@ -9,37 +8,35 @@ async def get_dashboard_stats(request):
     """
     # 1. Real Data
     total_users = await count_users()
-    bookings = await get_all_bookings()
+    total_orders = await count_orders()
     
-    active_orders = len([b for b in bookings if b.status == 'new'])
-    
-    # Placeholder for Revenue (Simple logic: 1 booking = 100 somoni for demo)
-    revenue = len([b for b in bookings if b.status == 'completed']) * 100
+    # Placeholder for Revenue (Assume avg deal value 2000 for demo)
+    revenue = total_orders * 50 # Mock avg revenue per lead just to show number
 
     stats = {
         "users": total_users,
         "revenue_today": revenue,  
-        "active_orders": active_orders,
-        "conversion_rate": "5%" # Mock
+        "active_orders": total_orders,
+        "conversion_rate": "15%" # Mock
     }
     
     return web.json_response(stats)
 
 async def get_bookings_list(request):
     """
-    Returns list of bookings for the Calendar.
+    Returns list of recent orders (leads).
     GET /api/bookings
     """
-    bookings = await get_all_bookings()
+    orders = await get_recent_orders(limit=10)
     
     data = []
-    for b in bookings:
+    for o in orders:
         data.append({
-            "id": b.id,
-            "client": b.client_name,
-            "service": b.service_type,
-            "time": b.slot_time.isoformat() if b.slot_time else None,
-            "status": b.status
+            "id": o.id,
+            "client": o.name or "Unknown",
+            "service": o.service_context or "Service",
+            "time": o.created_at.isoformat() if o.created_at else None,
+            "status": o.status
         })
         
     return web.json_response(data)
