@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bot.config import ADMIN_USERNAME
 
 def main_menu_kb() -> InlineKeyboardMarkup:
