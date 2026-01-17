@@ -1,5 +1,4 @@
-from aiohttp import web
-from bot.database import count_users, get_recent_orders, count_orders
+from bot.database import count_users, get_recent_orders, count_orders, get_order_by_id, update_order_status
 
 async def get_dashboard_stats(request):
     """
@@ -40,6 +39,66 @@ async def get_bookings_list(request):
         })
         
     return web.json_response(data)
+
+async def get_order_details(request):
+    """
+    Returns full details for a single order.
+    GET /api/orders/{id}
+    """
+    order_id = int(request.match_info['id'])
+    order = await get_order_by_id(order_id)
+    
+    if not order:
+        return web.json_response({"error": "Order not found"}, status=404)
+        
+    data = {
+        "id": order.id,
+        "name": order.name,
+        "contact_info": order.contact_info,
+        "business_type": order.business_type,
+        "budget": order.budget,
+        "task_description": order.task_description,
+        "status": order.status,
+        "created_at": order.created_at.isoformat() if order.created_at else None
+    }
+    return web.json_response(data)
+
+async def update_order_status(request):
+    """
+    Updates status and notifies user.
+    POST /api/orders/{id}/status
+    Body: {"status": "in_progress"}
+    """
+    order_id = int(request.match_info['id'])
+    body = await request.json()
+    new_status = body.get("status")
+    
+    if not new_status:
+        return web.json_response({"error": "Status required"}, status=400)
+        
+    updated_order = await update_order_status(order_id, new_status)
+    
+    if not updated_order:
+        return web.json_response({"error": "Order not found"}, status=404)
+        
+    # Notify User via Bot
+    bot = request.app["bot"]
+    user_id = updated_order.user_id
+    
+    status_msg = {
+        "in_progress": "🛠 Ваш заказ взят в работу! Скоро с вами свяжется менеджер.",
+        "completed": "✅ Ваш заказ выполнен! Спасибо, что выбрали нас.",
+        "cancelled": "❌ Ваш заказ был отменен. Если это ошибка, напишите нам."
+    }
+    
+    msg_text = status_msg.get(new_status, f"Статус вашего заказа обновлен: {new_status}")
+    
+    try:
+        await bot.send_message(chat_id=user_id, text=msg_text)
+    except Exception as e:
+        print(f"Failed to notify user {user_id}: {e}")
+        
+    return web.json_response({"status": "updated", "new_status": new_status})
 
 async def health_check(request):
     """Simple health check for Render."""
