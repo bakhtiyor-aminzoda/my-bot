@@ -346,7 +346,7 @@ async def process_contact_info(message: types.Message, state: FSMContext):
         reply_markup=post_submit_kb()
     )
 
-@router.message(F.text & StateFilter(None))
+@router.message(F.text, StateFilter(None))
 async def ai_chat_handler(message: types.Message):
     """
     Handles all text messages when user is NOT in a form (FSM).
