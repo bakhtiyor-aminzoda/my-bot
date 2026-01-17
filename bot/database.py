@@ -198,3 +198,34 @@ async def update_order_status(order_id: int, new_status: str):
             await session.commit()
             return order
         return None
+
+async def update_order_details(order_id: int, data: dict):
+    """Updates editable fields of an order."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Order).where(Order.id == order_id))
+        order = result.scalar_one_or_none()
+        
+        if order:
+            if "budget" in data: order.budget = data["budget"]
+            if "contact_info" in data: order.contact_info = data["contact_info"]
+            if "task_description" in data: order.task_description = data["task_description"]
+            
+            await session.commit()
+            return order
+        return None
+
+async def get_daily_stats(days: int = 7):
+    """Returns order counts grouped by day for the last N days."""
+    from sqlalchemy import func
+    async with AsyncSessionLocal() as session:
+        # Note: This query is dialect specific. Assuming SQLite/Postgres compatibility for simple date casting.
+        # For cross-db simplicity in this demo, we might fetch recent and aggregate in python if SQL is tricky without specific dialect imports.
+        # But let's try a standard approach.
+        cutoff = datetime.utcnow() - timedelta(days=days)
+        result = await session.execute(
+            select(func.date(Order.created_at), func.count(Order.id))
+            .where(Order.created_at >= cutoff)
+            .group_by(func.date(Order.created_at))
+            .order_by(func.date(Order.created_at))
+        )
+        return result.all()
