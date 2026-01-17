@@ -65,9 +65,19 @@ HOW_IT_WORKS_TEXT = (
 from aiogram.types import FSInputFile
 import os
 
+from bot.database import add_user, get_all_users
+import asyncio
+
 @router.message(CommandStart())
 async def cmd_start(message: types.Message, state: FSMContext):
     """Entry point: Shows Main Menu."""
+    # Save user to DB
+    await add_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.full_name
+    )
+
     await state.clear()
     
     caption_text = (

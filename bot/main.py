@@ -6,13 +6,18 @@ from aiogram import Bot, Dispatcher
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
 from bot.config import BOT_TOKEN
+from bot.database import init_db
 from bot.handlers import router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
-async def on_startup(bot: Bot, base_url: str):
-    await bot.set_webhook(f"{base_url}/webhook")
+async def on_startup_webhook(app):
+    await init_db()
+    webhook_url = os.getenv("WEBHOOK_URL")
+    if webhook_url:
+        bot = app["bot"]
+        await bot.set_webhook(f"{webhook_url}/webhook")
 
 def main():
     # Initialize Bot and Dispatcher
@@ -35,6 +40,7 @@ def main():
         
         # Create aiohttp app
         app = web.Application()
+        app["bot"] = bot # Store bot in app for startup handler
         
         # Create request handler
         webhook_requests_handler = SimpleRequestHandler(
@@ -48,8 +54,8 @@ def main():
         setup_application(app, dp, bot=bot)
         
         # Run app
-        # On startup, set webhook
-        app.on_startup.append(lambda app: bot.set_webhook(f"{webhook_url}/webhook"))
+        # On startup, set webhook AND init DB
+        app.on_startup.append(on_startup_webhook)
         
         web.run_app(app, host="0.0.0.0", port=port)
         
@@ -57,6 +63,7 @@ def main():
         # Polling mode for local dev
         print("Starting in POLLING mode...")
         async def run_polling():
+            await init_db() # Init DB
             await bot.delete_webhook(drop_pending_updates=True)
             await dp.start_polling(bot)
             

@@ -81,34 +81,38 @@ def setup_ai():
 # Global model instance
 model = setup_ai()
 
-# In-memory storage for chat sessions: { user_id: ChatSession }
-user_sessions = {}
+from bot.database import add_message, get_chat_history
+
+# ... (imports and setup_ai remain same)
+
+# Global model instance
+model = setup_ai()
 
 async def get_ai_response(user_id: int, user_text: str) -> str:
     """
-    Generates a response using Google Gemini, maintaining conversation history per user.
+    Generates a response using Google Gemini, maintaining conversation history via SQLite.
     """
     if not model:
         return "Извините, мой искусственный интеллект сейчас отдыхает (нет ключа API). 😴\nПопробуйте позже или выберите пункт в меню."
 
     try:
-        # Get or create chat session for this user
-        if user_id not in user_sessions:
-            # Initialize new chat with system prompt
-            # Note: history=[] starts empty, SYSTEM_PROMPT is already configured in the model.
-            user_sessions[user_id] = model.start_chat(history=[])
-            logger.info(f"Started new AI session for user {user_id}")
+        # 1. Fetch persistent history (Last 20 messages)
+        # Note: History does NOT include the current message yet
+        history = await get_chat_history(user_id, limit=20)
         
-        chat = user_sessions[user_id]
+        # 2. Start chat session with history
+        chat = model.start_chat(history=history)
         
-        # Send message to the chat session
+        # 3. Send new message to AI
         response = await chat.send_message_async(user_text)
+        
+        # 4. Save interactions to DB (Commit to history)
+        # We save AFTER success to avoid saving failed prompts if AI crashes
+        await add_message(user_id, 'user', user_text)
+        await add_message(user_id, 'model', response.text)
+        
         return response.text
         
     except Exception as e:
         logger.error(f"AI Generation Error: {e}")
-        # If session is broken (e.g. token limit), clear it
-        if user_id in user_sessions:
-            del user_sessions[user_id]
-            
         return "Что-то пошло не так с моим электронным мозгом. 🤯\nПопробуйте переформулировать вопрос."
