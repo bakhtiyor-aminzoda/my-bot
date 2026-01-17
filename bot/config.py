@@ -20,5 +20,8 @@ ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 GOOGLE_KEY_FILE = os.getenv("GOOGLE_KEY_FILE", "bot/credentials.json")
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "1o__PnwD7IE60SchAz4eV1PEAhBG5rbeJ_SAlC0Gg9zs") 
 
+# AI Config
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyDfSCzhIuhP05JWu-d6sqwNEejZbjGb8IQ")
+
 if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
     print("WARNING: BOT_TOKEN is not set in config.py or .env")

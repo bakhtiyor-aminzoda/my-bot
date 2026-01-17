@@ -1,5 +1,5 @@
 from aiogram import Router, F, types
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from bot.states import Application
 from bot.config import ADMIN_ID, ADMIN_USERNAME
@@ -43,7 +43,10 @@ ABOUT_TEXT = (
     "• <b>5 лет в банковской сфере.</b>\n"
     "• <b>3+ года в FinTech (Alif).</b> Прошел путь от Tech Support до Project Manager.\n\n"
     "Я знаю, как важна каждая заявка и как больно терять клиента из-за долгого ответа.\n"
-    "Поэтому я не «пишу код», а <b>строю систему продаж и сервиса</b> для вашего бизнеса."
+    "Поэтому я не «пишу код», а <b>строю систему продаж и сервиса</b> для вашего бизнеса.\n\n"
+    "📱 <b>Мои контакты:</b>\n"
+    "• <a href='https://instagram.com/starik.ai'>Instagram (@starik.ai)</a>\n"
+    "• <a href='https://www.linkedin.com/in/bakhtiyor-aminzoda/'>LinkedIn</a>"
 )
 
 HOW_IT_WORKS_TEXT = (
@@ -342,6 +345,20 @@ async def process_contact_info(message: types.Message, state: FSMContext):
         "Вы можете вернуться в меню или оставить еще одну.",
         reply_markup=post_submit_kb()
     )
+
+@router.message(F.text & StateFilter(None))
+async def ai_chat_handler(message: types.Message):
+    """
+    Handles all text messages when user is NOT in a form (FSM).
+    Passes text to Gemini AI.
+    """
+    # Send "typing" action to show the bot is thinking
+    await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
+    
+    from bot.ai_service import get_ai_response
+    response = await get_ai_response(message.text)
+    
+    await message.answer(response, parse_mode="Markdown")
 
 # --- Post-Submit & Misc Handlers ---
 
