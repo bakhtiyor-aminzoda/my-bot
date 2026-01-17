@@ -1,3 +1,5 @@
+import os
+import datetime
 from aiogram import Router, F, types
 from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
