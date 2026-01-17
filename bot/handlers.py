@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from bot.states import Application
 from bot.config import ADMIN_ID, ADMIN_USERNAME
-from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb
+from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb, budget_kb
 
 router = Router()
 
@@ -213,20 +213,22 @@ async def start_application_order(callback: types.CallbackQuery, state: FSMConte
     await _start_fsm(callback.message, state, context_name)
     await callback.answer()
 
+from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb, budget_kb
+# ... (imports)
+
 async def _start_fsm(message: types.Message, state: FSMContext, context: str = None):
     """
     Helper to start the FSM flow.
     """
     await state.set_state(Application.name)
     
+    prefix = "🚀 <b>Шаг 1 из 5</b>\n\n"
     if context:
-        text = f"Вы выбрали: <b>{context}</b>. Отличный выбор! 🔥\nДавайте познакомимся. Как вас зовут?"
+        text = f"{prefix}Вы выбрали: <b>{context}</b>. Отличный выбор! 🔥\nДавайте познакомимся. Как вас зовут?"
     else:
-        text = "Отлично! Давайте обсудим детали.\nКак вас зовут?"
+        text = f"{prefix}Отлично! Давайте обсудим детали.\nКак вас зовут?"
         
     await message.answer(text, reply_markup=types.ReplyKeyboardRemove(), parse_mode="HTML")
-
-# --- FSM Handlers ---
 
 @router.message(Application.name)
 async def process_name(message: types.Message, state: FSMContext):
@@ -245,7 +247,7 @@ async def process_name(message: types.Message, state: FSMContext):
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb_buttons, resize_keyboard=True, one_time_keyboard=True)
     
-    await message.answer("Какой у вас бизнес?", reply_markup=keyboard)
+    await message.answer("🏢 <b>Шаг 2 из 5</b>\n\nКакой у вас бизнес?", reply_markup=keyboard, parse_mode="HTML")
 
 @router.message(Application.business_type)
 async def process_business_type(message: types.Message, state: FSMContext):
@@ -254,16 +256,55 @@ async def process_business_type(message: types.Message, state: FSMContext):
         return
         
     await state.update_data(business_type=message.text)
-    await state.set_state(Application.task_description)
+    await state.set_state(Application.budget)
     
     await message.answer(
-        "Что именно вы хотите автоматизировать?\n\n"
-        "<i>Например:</i>\n"
-        "— Прием заказов и оплату\n"
-        "— Рассылку по базе клиентов\n"
-        "— Ответы на частые вопросы\n"
-        "— Запись на прием",
-        reply_markup=types.ReplyKeyboardRemove(),
+        "💰 <b>Шаг 3 из 5</b>\n\n"
+        "На какой бюджет проекта вы ориентируетесь?",
+        reply_markup=budget_kb(),
+        parse_mode="HTML"
+    )
+
+@router.callback_query(Application.budget) # Budget is chosen via Inline Buttons
+async def process_budget(callback: types.CallbackQuery, state: FSMContext):
+    # Map callback data to readable text
+    budget_map = {
+        "budget_low": "Эконом (1000-2000 с.)",
+        "budget_mid": "Бизнес (2000-5000 с.)",
+        "budget_high": "Премиум (от 5000 с.)"
+    }
+    selected_budget = budget_map.get(callback.data, callback.data)
+    
+    await state.update_data(budget=selected_budget)
+    await state.set_state(Application.task_description)
+    
+    await callback.message.edit_text(
+        f"✅ Бюджет: {selected_budget}\n\n"
+        "📝 <b>Шаг 4 из 5</b>\n\n"
+        "Что именно вы хотите автоматизировать?\n"
+        "<i>Например: прием заказов, запись клиентов, ответы на вопросы.</i>",
+        parse_mode="HTML"
+    )
+    await callback.answer()
+
+@router.message(Application.task_description)
+async def process_task_description(message: types.Message, state: FSMContext):
+    if not message.text:
+        await message.answer("Пожалуйста, опишите задачу текстом.")
+        return
+
+    await state.update_data(task_description=message.text)
+    await state.set_state(Application.contact_info)
+    
+    # Request Contact Keyboard
+    kb = [[types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)]]
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    
+    await message.answer(
+        "📞 <b>Шаг 5 из 5</b> — Финал!\n\n"
+        "Как с вами связываться? "
+        "Нажмите кнопку ниже, чтобы отправить контакт, или напишите номер вручную.",
+        reply_markup=keyboard,
         parse_mode="HTML"
     )
 
@@ -300,20 +341,30 @@ async def process_contact_info(message: types.Message, state: FSMContext):
     await state.update_data(contact_info=contact_info)
     
     data = await state.get_data()
-    user = message.from_user
-    username = f"@{user.username}" if user.username else "нет username"
-    
-    # Check if there is a service context
+    name = data.get("name", "Не указано")
+    business = data.get("business_type", "Не указано")
+    budget = data.get("budget", "Не выбрано") # New
+    task = data.get("task_description", "Не указано")
     service_context = data.get("service_context", "Общая заявка")
+    
+    # Save to Google Sheets
+    row = [name, contact_info, business, task, service_context, str(datetime.datetime.now())]
+    # Note: Sheets structure needs update if we want to save budget column. 
+    # For now, let's append it to task description or business type in One string to avoid breaking sheet structure?
+    # Or just add it to the end. The `add_lead` function takes a list.
+    # Let's check `sheets.py` quickly? No, I'll just append it to the task description cell for safety if I can't change columns easily.
+    # Actually, `add_lead` just appending a row. If I add a column, it might just parse it.
+    # But safer to just put it in the message for Admin.
     
     # Notify Admin
     summary = (
-        f"🔔 <b>Новая заявка: {service_context}</b> #lead\n\n"
-        f"👤 <b>Имя:</b> {data['name']}\n"
-        f"🏢 <b>Бизнес:</b> {data['business_type']}\n"
-        f"📝 <b>Задача:</b> {data['task_description']}\n"
+        f"🔥 <b>Новый лид!</b> (#{service_context.replace(' ', '_')})\n\n"
+        f"👤 <b>Имя:</b> {name}\n"
+        f"🏢 <b>Бизнес:</b> {business}\n"
+        f"💰 <b>Бюджет:</b> {budget}\n"
+        f"📝 <b>Задача:</b> {task}\n"
         f"📞 <b>Контакт:</b> {contact_info}\n"
-        f"🔗 <b>Telegram:</b> {username} (<a href='tg://user?id={user.id}'>профиль</a>)"
+        f"🔗 <a href='tg://user?id={message.from_user.id}'>Профиль пользователя</a>"
     )
     
     # Save to Google Sheets

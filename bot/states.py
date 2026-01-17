@@ -6,6 +6,7 @@ class Application(StatesGroup):
     """
     name = State()              # User's name
     business_type = State()     # Type of business
+    budget = State()
     task_description = State()  # What to automate
     contact_info = State()      # Contact details
     submitted = State()         # Application submitted, waiting in menu

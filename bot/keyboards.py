@@ -51,3 +51,11 @@ def ai_response_kb() -> InlineKeyboardMarkup: # Added type hint for consistency
     kb.button(text="🏠 Главное меню", callback_data="nav_back_main")
     kb.adjust(1)
     return kb.as_markup()
+
+def budget_kb():
+    kb = InlineKeyboardBuilder()
+    kb.button(text="📉 Эконом (1000-2000 с.)", callback_data="budget_low")
+    kb.button(text="📈 Бизнес (2000-5000 с.)", callback_data="budget_mid")
+    kb.button(text="💎 Премиум (от 5000 с.)", callback_data="budget_high")
+    kb.adjust(1)
+    return kb.as_markup()
