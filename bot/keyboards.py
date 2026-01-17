@@ -44,3 +44,10 @@ def post_submit_kb() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="✉️ Связаться напрямую", url=f"https://t.me/{ADMIN_USERNAME}")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
+
+def ai_response_kb() -> InlineKeyboardMarkup: # Added type hint for consistency
+    kb = InlineKeyboardBuilder()
+    kb.button(text="📝 Оставить заявку", callback_data="new_application") # Changed callback_data to match existing "new_application"
+    kb.button(text="🏠 Главное меню", callback_data="nav_back_main")
+    kb.adjust(1)
+    return kb.as_markup()

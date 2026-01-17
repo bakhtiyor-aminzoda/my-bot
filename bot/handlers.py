@@ -358,7 +358,8 @@ async def ai_chat_handler(message: types.Message):
     from bot.ai_service import get_ai_response
     response = await get_ai_response(message.text)
     
-    await message.answer(response, parse_mode="Markdown")
+    from bot.keyboards import ai_response_kb
+    await message.answer(response, parse_mode="Markdown", reply_markup=ai_response_kb())
 
 # --- Post-Submit & Misc Handlers ---
 
