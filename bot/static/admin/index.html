@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amini Admin</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>Dashboard</h1>
+                <p class="subtitle">Welcome back, Boss 👋</p>
+            </div>
+            <div class="avatar">
+                <img src="https://via.placeholder.com/50" alt="Admin" id="admin-avatar">
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="card stat-card blue">
+                <div class="icon">👥</div>
+                <div class="info">
+                    <span class="label">Users</span>
+                    <h2 id="total-users">...</h2>
+                </div>
+            </div>
+            <div class="card stat-card green">
+                <div class="icon">💰</div>
+                <div class="info">
+                    <span class="label">Revenue</span>
+                    <h2 id="revenue">...</h2>
+                </div>
+            </div>
+            <div class="card stat-card purple">
+                <div class="icon">📦</div>
+                <div class="info">
+                    <span class="label">Orders</span>
+                    <h2 id="active-orders">...</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendar / Recent Orders -->
+        <section class="section-header">
+            <h3>Recent Bookings</h3>
+            <button class="btn-sm">View All</button>
+        </section>
+
+        <section class="bookings-list" id="bookings-container">
+            <!-- Items injected by JS -->
+            <div class="loading-spinner">Loading...</div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

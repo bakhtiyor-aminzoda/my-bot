@@ -105,3 +105,33 @@ async def get_chat_history(user_id: int, limit: int = 20):
         rows.reverse()
         
         return [{"role": row.role, "parts": [row.content]} for row in rows]
+
+class Booking(Base):
+    __tablename__ = "bookings"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, index=True)
+    client_name = Column(String)
+    service_type = Column(String) # 'shop', 'booking', 'consultation'
+    slot_time = Column(DateTime)
+    status = Column(String, default="new") # new, approved, completed, cancelled
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+async def add_booking(user_id: int, client_name: str, service_type: str, slot_time: datetime):
+    """Creates a new booking."""
+    async with AsyncSessionLocal() as session:
+        booking = Booking(
+            user_id=user_id,
+            client_name=client_name,
+            service_type=service_type,
+            slot_time=slot_time
+        )
+        session.add(booking)
+        await session.commit()
+        return booking.id
+
+async def get_all_bookings():
+    """Returns all bookings for the admin dashboard."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Booking).order_by(Booking.slot_time.desc()))
+        return result.scalars().all()

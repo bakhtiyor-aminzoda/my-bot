@@ -153,6 +153,29 @@ async def cmd_stats(message: types.Message):
         parse_mode="HTML"
     )
 
+@router.message(Command("admin"))
+async def cmd_admin_panel(message: types.Message):
+    """Opens the Admin Pocket CRM."""
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    # Construct Web App URL
+    # In production, use the real domain. Locally, use ngrok or localhost (if Telegram supports it, which it doesn't easily).
+    # For now, we assume WEBHOOK_URL is set.
+    base_url = os.getenv("WEBHOOK_URL", "https://google.com") # Fallback to google if not set to prevent crash
+    web_app_url = f"{base_url}/admin/index.html"
+    
+    kb = InlineKeyboardBuilder()
+    kb.button(text="📱 Открыть CRM", web_app=types.WebAppInfo(url=web_app_url))
+    
+    await message.answer(
+        "<b>💼 Кабинет Владельца</b>\n\n"
+        "Нажмите кнопку ниже, чтобы открыть панель управления.",
+        reply_markup=kb.as_markup(),
+        parse_mode="HTML"
+    )
+
+
 @router.callback_query(F.data == "nav_services")
 async def nav_services(callback: types.CallbackQuery):
     text = (
