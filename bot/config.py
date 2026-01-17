@@ -11,7 +11,11 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "8478672514:AAGupR9_ymf7YARUhcMgnKq31ES_84hC9
 
 # Admin ID who receives the leads
 # You can find your ID via bots like @userinfobot
-ADMIN_ID = os.getenv("ADMIN_ID", 7179785109)
+try:
+    ADMIN_ID = int(os.getenv("ADMIN_ID", 7179785109))
+except (ValueError, TypeError):
+    ADMIN_ID = 7179785109
+    print("Warning: ADMIN_ID in .env is not a valid integer. Using default.")
 
 # Admin Username for direct contact link (without @)
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
