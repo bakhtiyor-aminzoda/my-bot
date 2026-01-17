@@ -1,16 +1,20 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
-.env
+# 1. Block EVERYTHING by default
+*
 
-# Project specific secrets
+# 2. Allow Bot Source Code
+!bot/
+
+# 3. Allow Deployment Files
+!Dockerfile
+!docker-compose.yml
+!requirements.txt
+!.gitignore
+
+# 4. Explicitly Block Secrets & Junk (Override whitelist if needed)
 bot/credentials.json
-credentials.json
-
-# Project specific assets
-instagram_assets/
-
-# MacOS
+bot/__pycache__/
+__pycache__/
 .DS_Store
+.env
+venv/
+instagram_assets/
