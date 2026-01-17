@@ -452,18 +452,12 @@ async def process_contact_info(message: types.Message, state: FSMContext):
         f"🔗 <a href='tg://user?id={message.from_user.id}'>Профиль пользователя</a>"
     )
     
-    # Save to Google Sheets
-    # We pass the full data dict, adding context manually if it's not in there perfectly, 
-    # but currently context IS in data.
-    from bot.sheets import add_lead
-    # Run in background or await if async? gspread is sync usually. 
-    # For a simple bot, sync call is okay, or we can wrap it. 
-    # To avoid blocking, in production we'd use threadpool or async gspread, 
-    # but for now let's just call it inside a try/except block to not block errors.
+    # Save to Database
+    from bot.database import add_order
     try:
-         add_lead(data)
+        await add_order(message.from_user.id, data)
     except Exception as e:
-         print(f"Sheet error: {e}")
+        print(f"DB error: {e}")
     
     try:
         await message.bot.send_message(chat_id=ADMIN_ID, text=summary, parse_mode="HTML")
