@@ -135,3 +135,48 @@ async def get_all_bookings():
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(Booking).order_by(Booking.slot_time.desc()))
         return result.scalars().all()
+
+class Order(Base):
+    __tablename__ = "orders"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, index=True)
+    name = Column(String)
+    contact_info = Column(String)
+    business_type = Column(String)
+    budget = Column(String)
+    task_description = Column(String)
+    service_context = Column(String)
+    status = Column(String, default="new")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+async def add_order(user_id: int, data: dict):
+    """Saves a new order/lead to the database."""
+    async with AsyncSessionLocal() as session:
+        order = Order(
+            user_id=user_id,
+            name=data.get("name"),
+            contact_info=data.get("contact_info"),
+            business_type=data.get("business_type"),
+            budget=data.get("budget"),
+            task_description=data.get("task_description"),
+            service_context=data.get("service_context", "General")
+        )
+        session.add(order)
+        await session.commit()
+        logger.info(f"📝 New order saved: {order.id}")
+        return order.id
+
+async def get_recent_orders(limit: int = 10):
+    """Returns recent orders for the dashboard."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(Order).order_by(Order.created_at.desc()).limit(limit)
+        )
+        return result.scalars().all()
+
+async def count_orders():
+    """Returns total number of orders."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Order.id))
+        return len(result.scalars().all())
