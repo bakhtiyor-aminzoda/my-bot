@@ -13,9 +13,12 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # Render's URL starts with postgres:// but SQLAlchemy requires postgresql+asyncpg://
+    # Ensure usage of asyncpg driver
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+        
     logger.info("🔌 Using remote PostgreSQL database.")
 else:
     DATABASE_URL = "sqlite+aiosqlite:///bot_database.db"
