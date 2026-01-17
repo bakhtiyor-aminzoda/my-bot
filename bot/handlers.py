@@ -356,7 +356,7 @@ async def ai_chat_handler(message: types.Message):
     await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
     
     from bot.ai_service import get_ai_response
-    response = await get_ai_response(message.text)
+    response = await get_ai_response(message.from_user.id, message.text)
     
     from bot.keyboards import ai_response_kb
     await message.answer(response, parse_mode="Markdown", reply_markup=ai_response_kb())

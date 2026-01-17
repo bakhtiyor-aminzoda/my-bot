@@ -81,19 +81,34 @@ def setup_ai():
 # Global model instance
 model = setup_ai()
 
-async def get_ai_response(user_text: str) -> str:
+# In-memory storage for chat sessions: { user_id: ChatSession }
+user_sessions = {}
+
+async def get_ai_response(user_id: int, user_text: str) -> str:
     """
-    Generates a response using Google Gemini.
+    Generates a response using Google Gemini, maintaining conversation history per user.
     """
     if not model:
         return "Извините, мой искусственный интеллект сейчас отдыхает (нет ключа API). 😴\nПопробуйте позже или выберите пункт в меню."
 
     try:
-        # Use simple generation for now. For context, we could use ChatSession but stateless is fine for simple Q&A.
-        # To maintain context, we would need to store history per user. 
-        # For MVP V2, let's keep it stateless (responds to the current message).
-        response = await model.generate_content_async(user_text)
+        # Get or create chat session for this user
+        if user_id not in user_sessions:
+            # Initialize new chat with system prompt
+            # Note: history=[] starts empty, SYSTEM_PROMPT is already configured in the model.
+            user_sessions[user_id] = model.start_chat(history=[])
+            logger.info(f"Started new AI session for user {user_id}")
+        
+        chat = user_sessions[user_id]
+        
+        # Send message to the chat session
+        response = await chat.send_message_async(user_text)
         return response.text
+        
     except Exception as e:
         logger.error(f"AI Generation Error: {e}")
+        # If session is broken (e.g. token limit), clear it
+        if user_id in user_sessions:
+            del user_sessions[user_id]
+            
         return "Что-то пошло не так с моим электронным мозгом. 🤯\nПопробуйте переформулировать вопрос."
