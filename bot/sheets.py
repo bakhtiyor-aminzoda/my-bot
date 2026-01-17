@@ -51,7 +51,8 @@ def add_lead(data: dict):
             data.get("name", ""),
             data.get("business_type", ""),
             data.get("task_description", ""),
-            data.get("contact_info", "")
+            data.get("contact_info", ""),
+            data.get("budget", "")
         ]
         
         sheet.append_row(row)
