@@ -1,5 +1,5 @@
 from aiohttp import web
-from bot.database import count_users, get_recent_orders, count_orders, get_order_by_id, update_order_status
+from bot.database import count_users, get_recent_orders, count_orders, get_order_by_id, update_order_status as db_update_order_status
 
 async def get_dashboard_stats(request):
     """
@@ -77,7 +77,7 @@ async def update_order_status(request):
     if not new_status:
         return web.json_response({"error": "Status required"}, status=400)
         
-    updated_order = await update_order_status(order_id, new_status)
+    updated_order = await db_update_order_status(order_id, new_status)
     
     if not updated_order:
         return web.json_response({"error": "Order not found"}, status=404)
