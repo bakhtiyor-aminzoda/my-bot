@@ -170,7 +170,10 @@ async def nav_back_main(callback: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "nav_back_services")
 async def nav_back_services(callback: types.CallbackQuery):
-    await callback.message.edit_text(
+    # Since we came from a Photo message (Detail View), strictly delete and send new.
+    await callback.message.delete()
+    
+    await callback.message.answer(
         "🛠 <b>Услуги</b>\n\n"
         "Выберите категорию:",
         reply_markup=services_kb(),
@@ -182,11 +185,36 @@ async def nav_back_services(callback: types.CallbackQuery):
 async def show_category_detail(callback: types.CallbackQuery):
     cat_id = callback.data.split("_")[1]
     info = SERVICES_INFO.get(cat_id, "Информация отсутствует.")
-    await callback.message.edit_text(
-        info,
-        reply_markup=service_detail_kb(cat_id),
-        parse_mode="HTML"
-    )
+    
+    # Image mapping
+    image_map = {
+        "shops": "shop.png",
+        "booking": "booking.png",
+        "support": "support.png"
+    }
+    
+    image_file = image_map.get(cat_id)
+    photo_path = os.path.join("bot", "images", image_file) if image_file else None
+    
+    # Delete previous menu (text)
+    await callback.message.delete()
+    
+    if photo_path and os.path.exists(photo_path):
+        photo = FSInputFile(photo_path)
+        await callback.message.answer_photo(
+            photo=photo,
+            caption=info,
+            reply_markup=service_detail_kb(cat_id),
+            parse_mode="HTML"
+        )
+    else:
+        # Fallback to text if image missing
+        await callback.message.answer(
+            info,
+            reply_markup=service_detail_kb(cat_id),
+            parse_mode="HTML"
+        )
+        
     await callback.answer()
 
 # --- Application Flow Starters ---
