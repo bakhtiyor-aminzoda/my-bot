@@ -1,20 +1,16 @@
-# 1. Block EVERYTHING by default
-*
+# 1. Ignore everything in the root directory
+/*
 
-# 2. Allow Bot Source Code
-!bot/
+# 2. Allow Bot Directory (and everything inside it)
+!/bot/
 
-# 3. Allow Deployment Files
-!Dockerfile
-!docker-compose.yml
-!requirements.txt
-!.gitignore
+# 3. Allow Deployment Files in Root
+!/Dockerfile
+!/docker-compose.yml
+!/requirements.txt
+!/.gitignore
 
-# 4. Explicitly Block Secrets & Junk (Override whitelist if needed)
-bot/credentials.json
-bot/__pycache__/
-__pycache__/
-.DS_Store
-.env
-venv/
-instagram_assets/
+# 4. Explicitly Block Secrets inside allowed folders
+/bot/credentials.json
+/bot/__pycache__/
+/bot/.env
