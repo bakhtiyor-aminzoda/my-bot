@@ -180,3 +180,21 @@ async def count_orders():
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(Order.id))
         return len(result.scalars().all())
+
+async def get_order_by_id(order_id: int):
+    """Returns a single order by ID."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Order).where(Order.id == order_id))
+        return result.scalar_one_or_none()
+
+async def update_order_status(order_id: int, new_status: str):
+    """Updates the status of an order."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Order).where(Order.id == order_id))
+        order = result.scalar_one_or_none()
+        
+        if order:
+            order.status = new_status
+            await session.commit()
+            return order
+        return None
