@@ -578,6 +578,26 @@ h2 {
 }
 
 
+
+/* Search Input */
+.search-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.5);
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
 /* Dark Mode Overrides for Modals */
 body.dark-mode .modal-card {
     background: #1c1c1e;
@@ -594,10 +614,15 @@ body.dark-mode .detail-row {
 }
 
 body.dark-mode .form-input,
-body.dark-mode .icon-input-trigger {
+body.dark-mode .icon-input-trigger,
+body.dark-mode .search-input {
     background: #2c2c2e;
     border-color: #38383a;
     color: #ffffff;
+}
+
+body.dark-mode .search-input:focus {
+    background: #1c1c1e;
 }
 
 body.dark-mode .detail-label {
@@ -606,4 +631,20 @@ body.dark-mode .detail-label {
 
 body.dark-mode .prod-title {
     color: #ffffff;
+}
+
+/* Global Dark Mode Fixes */
+body.dark-mode .stat-card,
+body.dark-mode .chart-card,
+body.dark-mode .booking-item,
+body.dark-mode .product-item {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .bottom-nav {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .avatar img {
+    border-color: #1c1c1e;
 }
