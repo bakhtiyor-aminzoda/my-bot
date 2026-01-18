@@ -106,6 +106,18 @@ function renderChart(chartData) {
     });
 }
 
+const STATUS_MAP = {
+    'new': 'Новый',
+    'negotiation_pending': 'Переговоры',
+    'in_progress': 'В работе',
+    'completed': 'Завершен',
+    'cancelled': 'Отменен'
+};
+
+function translateStatus(status) {
+    return STATUS_MAP[status] || status;
+}
+
 async function fetchBookings(query = null) {
     try {
         let url = '/api/bookings';
@@ -133,7 +145,8 @@ async function fetchBookings(query = null) {
                     <h4>${booking.client}</h4>
                     <p>${booking.service} • ${booking.time ? new Date(booking.time).toLocaleDateString() : 'N/A'}</p>
                 </div>
-                <div class="status ${booking.status}">${booking.status.toUpperCase()}</div>
+                <!-- Use translateStatus here -->
+                <div class="status ${booking.status}">${translateStatus(booking.status)}</div>
             `;
             container.appendChild(div);
         });
@@ -399,13 +412,22 @@ async function saveOrderDetails() {
             currentOrder = { ...currentOrder, ...updatedData };
             renderReadMode(currentOrder);
             document.getElementById('modal-actions').style.display = 'grid'; // Show actions again
-
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         } else {
-            alert("Ошибка сохранения");
+            // Read raw text first
+            const rawText = await response.text();
+            let errorMsg = "Неизвестная ошибка";
+            try {
+                const err = JSON.parse(rawText);
+                errorMsg = err.error || JSON.stringify(err);
+            } catch (e) {
+                errorMsg = rawText.substring(0, 200);
+            }
+            alert(`Ошибка сохранения (${response.status}): ${errorMsg}`);
         }
     } catch (e) {
-        alert("Ошибка сети");
+        console.error(e);
+        alert("Ошибка сети или скрипта: " + e.message);
     }
 }
 
@@ -421,8 +443,10 @@ function renderActions(order) {
             <button class="btn btn-secondary" onclick="updateStatus(${order.id}, 'completed')">✅ Готово</button>
             <button class="btn btn-danger" onclick="updateStatus(${order.id}, 'cancelled')">Отмена</button>
         `;
+    } else if (order.status === 'negotiation_pending') {
+        buttons = `<div class="detail-label" style="text-align:center; grid-column: span 2; color:#FF9500;">⏳ Ждем ответа клиента...</div>`;
     } else {
-        buttons = `<div class="detail-label" style="text-align:center; grid-column: span 2;">Статус: ${order.status.toUpperCase()}</div>`;
+        buttons = `<div class="detail-label" style="text-align:center; grid-column: span 2;">Статус: ${translateStatus(order.status)}</div>`;
     }
     document.getElementById('modal-actions').innerHTML = buttons;
     document.getElementById('modal-actions').style.display = 'grid';
@@ -434,7 +458,8 @@ function closeModal() {
 }
 
 async function updateStatus(id, status) {
-    if (!confirm(`Изменить статус на "${status}"?`)) return;
+    const statusRu = translateStatus(status);
+    if (!confirm(`Изменить статус на "${statusRu}"?`)) return;
 
     try {
         const response = await fetch(`/api/orders/${id}/status`, {
