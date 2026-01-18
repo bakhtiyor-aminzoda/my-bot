@@ -171,9 +171,14 @@ function updateCartUI() {
         if (!tg.MainButton.isVisible) {
             tg.MainButton.show();
         }
-        tg.MainButton.onClick(openCheckout);
-        tg.MainButton.offClick(submitOrder);
-        tg.MainButton.offClick(openCheckout); // Dedupe
+
+        // Clean up all potential listeners to avoid duplicates or errors
+        // We removed 'submitOrder' so checking it causes ReferenceError
+        tg.MainButton.offClick(openCheckout);
+        tg.MainButton.offClick(proceedToPayment);
+        tg.MainButton.offClick(finalizeOrder);
+
+        // Set the correct entry point listener
         tg.MainButton.onClick(openCheckout);
     } else {
         tg.MainButton.hide();
