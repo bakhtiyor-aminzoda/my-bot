@@ -577,8 +577,33 @@ h2 {
     transform: scale(1.1);
 }
 
-.emoji-option.active {
-    background: rgba(0, 122, 255, 0.1);
-    border-color: var(--accent-color);
-    box-shadow: 0 2px 6px rgba(0, 122, 255, 0.4);
+
+/* Dark Mode Overrides for Modals */
+body.dark-mode .modal-card {
+    background: #1c1c1e;
+    border: 1px solid #38383a;
+}
+
+body.dark-mode .close-btn {
+    background: #2c2c2e;
+    color: #ffffff;
+}
+
+body.dark-mode .detail-row {
+    border-bottom: 1px solid #38383a;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .icon-input-trigger {
+    background: #2c2c2e;
+    border-color: #38383a;
+    color: #ffffff;
+}
+
+body.dark-mode .detail-label {
+    color: #8e8e93;
+}
+
+body.dark-mode .prod-title {
+    color: #ffffff;
 }
