@@ -121,11 +121,13 @@ async def show_my_orders(callback: types.CallbackQuery):
             date_str = o.created_at.strftime("%d.%m.%Y")
             budget_str = o.budget if o.budget else "—"
             
+            # Cleaner Layout
             text += (
                 f"🔹 <b>Заказ #{o.id}</b>\n"
+                f"📝 <b>{o.service_context}</b>\n"
                 f"📅 {date_str} • {status_text}\n"
-                f"📝 {o.service_context}\n"
-                f"💰 {budget_str}\n\n"
+                f"💰 {budget_str}\n"
+                f"──────────────\n\n"
             )
             
     kb = types.InlineKeyboardMarkup(inline_keyboard=[
