@@ -106,6 +106,10 @@ function addToCart(id) {
     const currentFilter = document.querySelector('.tab.active').getAttribute('onclick').match(/'([^']+)'/)[1];
     renderProducts(currentFilter);
 
+    if (document.getElementById('checkout-modal').classList.contains('active')) {
+        openCheckout(); // Re-render modal list to show updated quantity
+    }
+
     if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 }
 
