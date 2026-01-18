@@ -93,57 +93,66 @@ function filter(cat) {
 }
 
 function addToCart(id) {
-    const product = products.find(p => p.id === id);
+    try {
+        const product = products.find(p => p.id === id);
+        if (!product) return;
 
-    if (cart[id]) {
-        cart[id].qty++;
-    } else {
-        cart[id] = { product: product, qty: 1 };
+        if (cart[id]) {
+            cart[id].qty++;
+        } else {
+            cart[id] = { product: product, qty: 1 };
+        }
+
+        updateCartUI();
+
+        // Safely re-render grid
+        const activeTabObj = document.querySelector('.tab.active');
+        if (activeTabObj) {
+            const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
+            const currentFilter = match ? match[1] : 'all';
+            renderProducts(currentFilter);
+        }
+
+        // Force re-render modal if active
+        const modal = document.getElementById('checkout-modal');
+        if (modal && modal.classList.contains('active')) {
+            openCheckout();
+        }
+
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    } catch (e) {
+        console.error("Cart Error:", e);
     }
-
-    updateCartUI();
-
-    // Safely re-render grid
-    const activeTabObj = document.querySelector('.tab.active');
-    if (activeTabObj) {
-        const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
-        const currentFilter = match ? match[1] : 'all';
-        renderProducts(currentFilter);
-    }
-
-    // Force re-render modal if active (Crucial for total update)
-    const modal = document.getElementById('checkout-modal');
-    if (modal && modal.classList.contains('active')) {
-        openCheckout();
-    }
-
-    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 }
 
 function removeFromCart(id) {
-    if (cart[id]) {
-        cart[id].qty--;
-        if (cart[id].qty <= 0) {
-            delete cart[id];
+    try {
+        if (cart[id]) {
+            cart[id].qty--;
+            if (cart[id].qty <= 0) {
+                delete cart[id];
+            }
         }
-    }
-    updateCartUI();
+        updateCartUI();
 
-    // Safely re-render grid
-    const activeTabObj = document.querySelector('.tab.active');
-    if (activeTabObj) {
-        const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
-        const currentFilter = match ? match[1] : 'all';
-        renderProducts(currentFilter);
-    }
+        // Safely re-render grid
+        const activeTabObj = document.querySelector('.tab.active');
+        if (activeTabObj) {
+            const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
+            const currentFilter = match ? match[1] : 'all';
+            renderProducts(currentFilter);
+        }
 
-    // Force re-render modal if active
-    const modal = document.getElementById('checkout-modal');
-    if (modal && modal.classList.contains('active')) {
-        openCheckout();
-    }
+        // Force re-render modal
+        const modal = document.getElementById('checkout-modal');
+        if (modal && modal.classList.contains('active')) {
+            openCheckout();
+        }
 
-    if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    } catch (e) {
+        console.error("Cart remove error:", e);
+    }
 }
 
 function updateCartUI() {
