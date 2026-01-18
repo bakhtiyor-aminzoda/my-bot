@@ -3,7 +3,7 @@ from bot.database import (
     count_users, get_recent_orders, count_orders, get_order_by_id, 
     update_order_status as db_update_order_status, 
     update_order_details as db_update_order_details,
-    get_daily_stats, get_all_user_ids
+    get_daily_stats, get_all_user_ids, add_order
 )
 from bot.config import ADMIN_ID
 import asyncio
@@ -175,6 +175,64 @@ async def send_broadcast(request):
             print(f"Broadcast fail for {uid}: {e}")
             
     return web.json_response({"status": "sent", "count": count})
+
+async def create_client_order(request):
+    """
+    POST /api/client/orders
+    Public endpoint for Web App to create orders.
+    Body: {
+        "user_id": 123,
+        "name": "Ivan",
+        "contact_info": "+992...",
+        "items": [{"title": "Shop", "price": 500}, ...],
+        "total": 500,
+        "comment": "Fast please"
+    }
+    """
+    body = await request.json()
+    user_id = body.get("user_id")
+    
+    if not user_id:
+        return web.json_response({"error": "User ID required"}, status=400)
+
+    # Format data for existing DB structure
+    items_str = ", ".join([i['title'] for i in body.get("items", [])])
+    total = body.get("total", 0)
+    comment = body.get("comment", "")
+    
+    description = f"Заказ через Web App:\nУслуги: {items_str}\nИтого: {total} TJS\nКомментарий: {comment}"
+    
+    order_data = {
+        "name": body.get("name"),
+        "contact_info": body.get("contact_info"),
+        "business_type": "Web App Order",
+        "budget": f"{total} TJS",
+        "task_description": description,
+        "service_context": "Storefront"
+    }
+    
+    try:
+        from bot.database import add_order
+        print(f"DEBUG: Saving web order for {user_id}")
+        order_id = await add_order(user_id, order_data)
+        
+        # Notify Admin
+        bot = request.app["bot"]
+        summary = (
+            f"🛍 <b>Новый заказ из Магазина!</b> (#{order_id})\n\n"
+            f"👤 <b>Клиент:</b> {order_data['name']}\n"
+            f"📞 <b>Контакт:</b> {order_data['contact_info']}\n"
+            f"🛒 <b>Услуги:</b> {items_str}\n"
+            f"💰 <b>Сумма:</b> {total} TJS\n"
+            f"📝 <b>Коммент:</b> {comment}"
+        )
+        await bot.send_message(chat_id=ADMIN_ID, text=summary, parse_mode="HTML")
+        
+        return web.json_response({"status": "created", "order_id": order_id})
+        
+    except Exception as e:
+        print(f"Web Order Error: {e}")
+        return web.json_response({"error": str(e)}, status=500)
 
 async def health_check(request):
     """Simple health check for Render."""
