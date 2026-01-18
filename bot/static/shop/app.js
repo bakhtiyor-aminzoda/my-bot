@@ -94,26 +94,33 @@ function filter(cat) {
 
 function addToCart(id) {
     try {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-
+        // Optimize: Check cart first
         if (cart[id]) {
             cart[id].qty++;
         } else {
+            const product = products.find(p => p.id === id);
+            if (!product) {
+                console.error("Product not found:", id);
+                return;
+            }
             cart[id] = { product: product, qty: 1 };
         }
 
         updateCartUI();
 
-        // Safely re-render grid
-        const activeTabObj = document.querySelector('.tab.active');
-        if (activeTabObj) {
-            const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
-            const currentFilter = match ? match[1] : 'all';
-            renderProducts(currentFilter);
+        // Re-render grid counters
+        // Using a try-catch for the DOM manipulation specifically
+        try {
+            const activeTabObj = document.querySelector('.tab.active');
+            if (activeTabObj) {
+                const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
+                if (match) renderProducts(match[1]);
+            }
+        } catch (domErr) {
+            console.warn("Grid update skipped:", domErr);
         }
 
-        // Force re-render modal if active
+        // Force re-render modal
         const modal = document.getElementById('checkout-modal');
         if (modal && modal.classList.contains('active')) {
             openCheckout();
@@ -121,7 +128,8 @@ function addToCart(id) {
 
         if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
     } catch (e) {
-        console.error("Cart Error:", e);
+        console.error("Cart Add Error:", e);
+        tg.showAlert("Error adding to cart: " + e.message);
     }
 }
 
