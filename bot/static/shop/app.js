@@ -90,7 +90,16 @@ function updateCartUI() {
         tg.MainButton.onClick(openCheckout);
     } else {
         tg.MainButton.hide();
+        document.getElementById('checkout-modal').classList.remove('active'); // Auto close if empty
     }
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartUI();
+    // Re-render list if modal is open
+    openCheckout();
+    if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
 }
 
 // Modal
@@ -103,16 +112,18 @@ function openCheckout() {
     list.innerHTML = '';
     let total = 0;
 
-    cart.forEach(item => {
+    cart.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'cart-item';
         div.innerHTML = `
-            <span class="cart-item-title">${item.title}</span>
-            <span class="cart-item-price">${item.price} TJS</span>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="cart-del-btn" onclick="removeFromCart(${index})">⛔️</div>
+                <div>
+                    <div class="cart-item-title">${item.title}</div>
+                    <div class="cart-item-price">${item.price} TJS</div>
+                </div>
+            </div>
         `;
-
-        // Allow removing intent? For simplicity, keeping it add-only for now, can add delete btn later.
-
         list.appendChild(div);
         total += item.price;
     });
