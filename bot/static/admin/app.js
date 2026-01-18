@@ -474,12 +474,21 @@ function openProductModal(product = null) {
 function selectIcon(icon) {
     document.getElementById('prod-icon').value = icon;
     document.getElementById('selected-icon-display').innerText = icon;
+    closeEmojiPicker();
 
     // Highlight active
     document.querySelectorAll('.emoji-option').forEach(el => {
         el.style.transform = el.innerText === icon ? 'scale(1.1)' : 'scale(1)';
         el.style.border = el.innerText === icon ? '2px solid #007AFF' : 'none';
     });
+}
+
+function openEmojiPicker() {
+    document.getElementById('emoji-modal').classList.add('active');
+}
+
+function closeEmojiPicker() {
+    document.getElementById('emoji-modal').classList.remove('active');
 }
 
 function closeProductModal() {

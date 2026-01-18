@@ -173,41 +173,61 @@
                     </div>
                     <div>
                         <label class="detail-label">Иконка</label>
-                        <div class="icon-selector">
+                        <label class="detail-label">Иконка</label>
+                        <div class="icon-input-trigger" onclick="openEmojiPicker()">
+                            <span id="selected-icon-display">📦</span>
+                            <span style="font-size:13px; color:var(--text-secondary); margin-left:8px;">Выбрать
+                                иконку</span>
                             <input type="hidden" id="prod-icon" value="📦">
-                            <div id="selected-icon-display" class="selected-icon">📦</div>
-                            <div class="emoji-grid">
-                                <span class="emoji-option" onclick="selectIcon('🤖')">🤖</span>
-                                <span class="emoji-option" onclick="selectIcon('🛍')">🛍</span>
-                                <span class="emoji-option" onclick="selectIcon('📊')">📊</span>
-                                <span class="emoji-option" onclick="selectIcon('📅')">📅</span>
-                                <span class="emoji-option" onclick="selectIcon('📢')">📢</span>
-                                <span class="emoji-option" onclick="selectIcon('💎')">💎</span>
-                                <span class="emoji-option" onclick="selectIcon('🔥')">🔥</span>
-                                <span class="emoji-option" onclick="selectIcon('🚀')">🚀</span>
-                                <span class="emoji-option" onclick="selectIcon('⚙️')">⚙️</span>
-                                <span class="emoji-option" onclick="selectIcon('👥')">👥</span>
-                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <label class="detail-label">Категория</label>
-                <select id="prod-category" class="form-input"
-                    style="background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color);">
-                    <option value="bots">Чат-боты</option>
-                    <option value="crm">CRM Системы</option>
-                    <option value="other">Разное</option>
-                </select>
+            <label class="detail-label">Категория</label>
+            <select id="prod-category" class="form-input"
+                style="background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color);">
+                <option value="bots">Чат-боты</option>
+                <option value="crm">CRM Системы</option>
+                <option value="other">Разное</option>
+            </select>
 
-                <label class="detail-label">Описание</label>
-                <textarea id="prod-desc" rows="3" class="form-input" placeholder="Краткое описание..."></textarea>
+            <label class="detail-label">Описание</label>
+            <textarea id="prod-desc" rows="3" class="form-input" placeholder="Краткое описание..."></textarea>
 
-                <div class="modal-actions" style="margin-top:20px;">
-                    <button class="btn btn-primary" onclick="saveProduct()">Сохранить</button>
-                    <button class="btn btn-danger" id="btn-delete-prod" onclick="deleteProduct()"
-                        style="display:none">Удалить</button>
-                </div>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button class="btn btn-primary" onclick="saveProduct()">Сохранить</button>
+                <button class="btn btn-danger" id="btn-delete-prod" onclick="deleteProduct()"
+                    style="display:none">Удалить</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Emoji Picker Modal -->
+    <div class="modal-overlay" id="emoji-modal" style="z-index: 2000;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Выберите иконку</h2>
+                <button class="close-btn" onclick="closeEmojiPicker()">×</button>
+            </div>
+            <div class="emoji-grid">
+                <span class="emoji-option" onclick="selectIcon('🤖')">🤖</span>
+                <span class="emoji-option" onclick="selectIcon('🛍')">🛍</span>
+                <span class="emoji-option" onclick="selectIcon('📊')">📊</span>
+                <span class="emoji-option" onclick="selectIcon('📅')">📅</span>
+                <span class="emoji-option" onclick="selectIcon('📢')">📢</span>
+                <span class="emoji-option" onclick="selectIcon('💎')">💎</span>
+                <span class="emoji-option" onclick="selectIcon('🔥')">🔥</span>
+                <span class="emoji-option" onclick="selectIcon('🚀')">🚀</span>
+                <span class="emoji-option" onclick="selectIcon('⚙️')">⚙️</span>
+                <span class="emoji-option" onclick="selectIcon('👥')">👥</span>
+                <span class="emoji-option" onclick="selectIcon('🎨')">🎨</span>
+                <span class="emoji-option" onclick="selectIcon('💻')">💻</span>
+                <span class="emoji-option" onclick="selectIcon('📱')">📱</span>
+                <span class="emoji-option" onclick="selectIcon('🔧')">🔧</span>
+                <span class="emoji-option" onclick="selectIcon('🎁')">🎁</span>
+                <span class="emoji-option" onclick="selectIcon('⭐️')">⭐️</span>
             </div>
         </div>
     </div>
