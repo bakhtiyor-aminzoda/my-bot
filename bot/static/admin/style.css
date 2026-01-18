@@ -51,8 +51,11 @@ body {
 header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    /* Align top so avatar doesn't float in middle if text wraps */
     margin-bottom: 32px;
+    gap: 16px;
+    /* Prevent touching */
 }
 
 h1 {
