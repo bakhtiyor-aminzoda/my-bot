@@ -248,3 +248,90 @@ async def get_daily_stats(days: int = 7):
             .order_by(func.date(Order.created_at))
         )
         return result.all()
+
+class Product(Base):
+    __tablename__ = "products"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String)
+    price = Column(Integer)
+    icon = Column(String) # Emoji or Image URL
+    category = Column(String) # 'bots', 'crm', 'other'
+    desc = Column(String)
+    is_active = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+async def add_product(data: dict):
+    """Adds a new product."""
+    async with AsyncSessionLocal() as session:
+        product = Product(
+            title=data.get("title"),
+            price=data.get("price"),
+            icon=data.get("icon"),
+            category=data.get("category"),
+            desc=data.get("desc"),
+            is_active=1
+        )
+        session.add(product)
+        await session.commit()
+        return product.id
+
+async def get_all_products(only_active: bool = True):
+    """Returns all products."""
+    async with AsyncSessionLocal() as session:
+        query = select(Product)
+        if only_active:
+            query = query.where(Product.is_active == 1)
+        
+        # Sort by ID or Category
+        query = query.order_by(Product.id.asc())
+        
+        result = await session.execute(query)
+        return result.scalars().all()
+
+async def update_product(product_id: int, data: dict):
+    """Updates a product."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Product).where(Product.id == product_id))
+        product = result.scalar_one_or_none()
+        
+        if product:
+            for key, value in data.items():
+                if hasattr(product, key):
+                    setattr(product, key, value)
+            await session.commit()
+            return product
+        return None
+
+async def delete_product(product_id: int):
+    """Soft deletes a product."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Product).where(Product.id == product_id))
+        product = result.scalar_one_or_none()
+        
+        if product:
+            product.is_active = 0
+            await session.commit()
+            return True
+        return False
+
+async def seed_products():
+    """Seeds default products if table is empty."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Product).limit(1))
+        if result.scalar_one_or_none():
+            return # Already has data
+            
+    # Default Products
+    items = [
+        {"title": 'Telegram Магазин', "price": 2500, "icon": '🛍', "category": 'bots', "desc": 'Каталог, корзина, оплата внутри Telegram.'},
+        {"title": 'CRM Система', "price": 4000, "icon": '📊', "category": 'crm', "desc": 'Управление заявками и аналитика для бизнеса.'},
+        {"title": 'Чат-бот Визитка', "price": 1000, "icon": '📇', "category": 'bots', "desc": 'Ответы на вопросы, контакты, портфолио.'},
+        {"title": 'Запись клиентов', "price": 3000, "icon": '📅', "category": 'bots', "desc": 'Бронирование слотов, календарь, напоминания.'},
+        {"title": 'AI Ассистент', "price": 5000, "icon": '🤖', "category": 'crm', "desc": 'Умный бот на базе GPT для техподдержки.'},
+        {"title": 'Консультация', "price": 500, "icon": '👨‍💻', "category": 'other', "desc": 'Разбор вашей бизнес-задачи за 1 час.'}
+    ]
+    
+    for item in items:
+        await add_product(item)
+    logger.info("🌱 Database seeded with default products.")

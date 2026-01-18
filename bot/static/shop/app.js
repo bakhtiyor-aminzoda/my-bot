@@ -5,19 +5,12 @@ tg.expand();
 tg.setHeaderColor("secondary_bg_color");
 tg.setBackgroundColor("secondary_bg_color");
 
-const products = [
-    { id: 1, title: 'Telegram Магазин', price: 2500, icon: '🛍', category: 'bots', desc: 'Каталог, корзина, оплата внутри Telegram.' },
-    { id: 2, title: 'CRM Система', price: 4000, icon: '📊', category: 'crm', desc: 'Управление заявками и аналитика для бизнеса.' },
-    { id: 3, title: 'Чат-бот Визитка', price: 1000, icon: '📇', category: 'bots', desc: 'Ответы на вопросы, контакты, портфолио.' },
-    { id: 4, title: 'Запись клиентов', price: 3000, icon: '📅', category: 'bots', desc: 'Бронирование слотов, календарь, напоминания.' },
-    { id: 5, title: 'AI Ассистент', price: 5000, icon: '🤖', category: 'crm', desc: 'Умный бот на базе GPT для техподдержки.' },
-    { id: 6, title: 'Консультация', price: 500, icon: '👨‍💻', category: 'other', desc: 'Разбор вашей бизнес-задачи за 1 час.' }
-];
-
+let products = [];
 let cart = [];
 
 // Init
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchProducts();
     renderProducts('all');
 
     // User Info
@@ -41,10 +34,24 @@ function renderProducts(filter) {
 
     products.forEach(p => {
         if (filter !== 'all' && p.category !== filter) return;
+    });
 
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.innerHTML = `
+    async function fetchProducts() {
+        try {
+            const response = await fetch('/api/products');
+            if (response.ok) {
+                products = await response.json();
+                console.log("Products loaded:", products);
+            } else {
+                console.error("Failed to load products");
+            }
+        } catch (e) {
+            console.error("Error loading products:", e);
+        }
+    }
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
             <div>
                 <div class="icon-box">${p.icon}</div>
                 <h3 class="product-title">${p.title}</h3>
@@ -55,12 +62,12 @@ function renderProducts(filter) {
                 <button class="add-btn" onclick="addToCart(${p.id})">+</button>
             </div>
         `;
-        container.appendChild(card);
-    });
+    container.appendChild(card);
+});
 
-    // Update tabs UI
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`.tab[onclick="filter('${filter}')"]`).classList.add('active');
+// Update tabs UI
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+document.querySelector(`.tab[onclick="filter('${filter}')"]`).classList.add('active');
 }
 
 function filter(cat) {

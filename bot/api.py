@@ -3,7 +3,8 @@ from bot.database import (
     count_users, get_recent_orders, count_orders, get_order_by_id, 
     update_order_status as db_update_order_status, 
     update_order_details as db_update_order_details,
-    get_daily_stats, get_all_user_ids, add_order
+    get_daily_stats, get_all_user_ids, add_order,
+    add_product, get_all_products, update_product, delete_product
 )
 from bot.config import ADMIN_ID
 import asyncio
@@ -233,6 +234,47 @@ async def create_client_order(request):
     except Exception as e:
         print(f"Web Order Error: {e}")
         return web.json_response({"error": str(e)}, status=500)
+
+async def get_products_list(request):
+    """GET /api/products"""
+    products = await get_all_products(only_active=True)
+    data = []
+    for p in products:
+        data.append({
+            "id": p.id,
+            "title": p.title,
+            "price": p.price,
+            "icon": p.icon,
+            "category": p.category,
+            "desc": p.desc
+        })
+    return web.json_response(data)
+
+@require_admin
+async def create_product(request):
+    """POST /api/products"""
+    body = await request.json()
+    product_id = await add_product(body)
+    return web.json_response({"id": product_id}, status=201)
+
+@require_admin
+async def update_product_endpoint(request):
+    """PUT /api/products/{id}"""
+    product_id = int(request.match_info['id'])
+    body = await request.json()
+    updated = await update_product(product_id, body)
+    if updated:
+        return web.json_response({"status": "updated"})
+    return web.json_response({"error": "Not found"}, status=404)
+
+@require_admin
+async def delete_product_endpoint(request):
+    """DELETE /api/products/{id}"""
+    product_id = int(request.match_info['id'])
+    success = await delete_product(product_id)
+    if success:
+        return web.json_response({"status": "deleted"})
+    return web.json_response({"error": "Not found"}, status=404)
 
 async def health_check(request):
     """Simple health check for Render."""
