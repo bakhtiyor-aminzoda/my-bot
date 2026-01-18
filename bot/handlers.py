@@ -454,3 +454,65 @@ async def process_submitted_message(message: types.Message):
         "— или посмотреть, как я работаю",
         reply_markup=post_submit_kb()
     )
+
+
+@router.callback_query(F.data.startswith("negotiation_"))
+async def process_negotiation(callback: types.CallbackQuery):
+    """Handles Accept/Reject from Client."""
+    print(f"DEBUG: Negotiation callback: {callback.data}")
+    try:
+        parts = callback.data.split("_")
+        action_type = parts[1] # accept or reject
+        order_id = int(parts[2])
+        
+        from bot.database import update_order_status
+        from bot.config import ADMIN_ID
+        
+        print(f"DEBUG: Processing {action_type} for order {order_id}")
+        
+        if action_type == "accept":
+            updated = await update_order_status(order_id, "in_progress")
+            if not updated:
+                print("DEBUG: Order not found or update failed")
+                await callback.answer("Ошибка: заказ не найден", show_alert=True)
+                return
+
+            msg_text = f"✅ <b>Вы приняли условия!</b>\nЗаказ #{order_id} передан в работу. Менеджер свяжется с вами."
+            try:
+                await callback.message.edit_text(msg_text, parse_mode="HTML")
+            except Exception as e:
+                print(f"DEBUG: Edit failed (old message?): {e}")
+                await callback.message.answer(msg_text, parse_mode="HTML")
+
+            # Notify Admin
+            try:
+                await callback.bot.send_message(
+                    chat_id=ADMIN_ID, 
+                    text=f"✅ <b>Клиент принял условия!</b>\nЗаказ #{order_id} теперь в работе\n(Принял в Telegram)"
+                )
+            except Exception as e:
+                print(f"DEBUG: Admin notify failed: {e}")
+            
+        elif action_type == "reject":
+            await update_order_status(order_id, "cancelled")
+            msg_text = f"❌ <b>Вы отказались от условий.</b>\nЗаказ #{order_id} отменен."
+            
+            try:
+                await callback.message.edit_text(msg_text, parse_mode="HTML")
+            except Exception:
+                await callback.message.answer(msg_text, parse_mode="HTML")
+
+            # Notify Admin
+            try:
+                await callback.bot.send_message(
+                    chat_id=ADMIN_ID, 
+                    text=f"❌ <b>Клиент отказался!</b>\nЗаказ #{order_id} отменен."
+                )
+            except: pass
+        
+        await callback.answer("Готово!")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"Negotiation Error: {e}")
+        await callback.answer("Произошла ошибка при обработке", show_alert=True)
