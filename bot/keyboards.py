@@ -1,16 +1,20 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bot.config import ADMIN_USERNAME
 
-def main_menu_kb() -> InlineKeyboardMarkup:
+def main_menu_kb(webapp_url: str = None) -> InlineKeyboardMarkup:
     """
     Main Menu Keyboard
     """
-    kb = [
-        [InlineKeyboardButton(text="🛠 Услуги", callback_data="nav_services")],
+    kb = []
+    if webapp_url:
+        kb.append([InlineKeyboardButton(text="🚀 Магазин услуг", web_app=WebAppInfo(url=webapp_url))])
+    
+    kb.extend([
+        [InlineKeyboardButton(text="🛠 Услуги (Текст)", callback_data="nav_services")],
         [InlineKeyboardButton(text="ℹ️ Обо мне", callback_data="nav_about")],
         [InlineKeyboardButton(text="📩 Оставить заявку", callback_data="new_application")]
-    ]
+    ])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 def services_kb() -> InlineKeyboardMarkup:

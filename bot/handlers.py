@@ -73,6 +73,10 @@ import asyncio
 @router.message(CommandStart())
 async def cmd_start(message: types.Message, state: FSMContext):
     """Entry point: Shows Main Menu."""
+    # Determine Shop URL
+    base_url = os.getenv("WEBHOOK_URL", "https://google.com")
+    shop_url = f"{base_url}/shop/index.html"
+
     # Save user to DB
     await add_user(
         message.from_user.id,
@@ -117,14 +121,14 @@ async def cmd_start(message: types.Message, state: FSMContext):
         await message.answer_photo(
             photo=photo,
             caption=caption_text,
-            reply_markup=main_menu_kb(),
+            reply_markup=main_menu_kb(shop_url),
             parse_mode="Markdown"
         )
     else:
         # Fallback if photo not found
         await message.answer(
             caption_text,
-            reply_markup=main_menu_kb(),
+            reply_markup=main_menu_kb(shop_url),
             parse_mode="Markdown"
         )
 
@@ -132,9 +136,12 @@ async def cmd_start(message: types.Message, state: FSMContext):
 async def cmd_cancel(message: types.Message, state: FSMContext):
     """Global cancel command."""
     await state.clear()
+    base_url = os.getenv("WEBHOOK_URL", "https://google.com")
+    shop_url = f"{base_url}/shop/index.html"
+    
     await message.answer(
         "Действие отменено. 🚫\nВозвращаемся в меню.",
-        reply_markup=main_menu_kb()
+        reply_markup=main_menu_kb(shop_url)
     )
 
 @router.message(Command("stats"))
@@ -216,11 +223,14 @@ async def nav_back_main(callback: types.CallbackQuery, state: FSMContext):
         "• <b>Заявка</b> — Обсудить индивидуальный проект"
     )
     
+    base_url = os.getenv("WEBHOOK_URL", "https://google.com")
+    shop_url = f"{base_url}/shop/index.html"
+    
     if callback.message.photo:
         await callback.message.delete()
-        await callback.message.answer(text, reply_markup=main_menu_kb(), parse_mode="HTML")
+        await callback.message.answer(text, reply_markup=main_menu_kb(shop_url), parse_mode="HTML")
     else:
-        await callback.message.edit_text(text, reply_markup=main_menu_kb(), parse_mode="HTML")
+        await callback.message.edit_text(text, reply_markup=main_menu_kb(shop_url), parse_mode="HTML")
     await callback.answer()
 
 @router.callback_query(F.data == "nav_back_services")
