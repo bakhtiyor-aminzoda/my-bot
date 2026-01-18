@@ -102,12 +102,19 @@ function addToCart(id) {
     }
 
     updateCartUI();
-    // Re-render to show counter on button immediately
-    const currentFilter = document.querySelector('.tab.active').getAttribute('onclick').match(/'([^']+)'/)[1];
-    renderProducts(currentFilter);
 
-    if (document.getElementById('checkout-modal').classList.contains('active')) {
-        openCheckout(); // Re-render modal list to show updated quantity
+    // Safely re-render grid
+    const activeTabObj = document.querySelector('.tab.active');
+    if (activeTabObj) {
+        const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
+        const currentFilter = match ? match[1] : 'all';
+        renderProducts(currentFilter);
+    }
+
+    // Force re-render modal if active (Crucial for total update)
+    const modal = document.getElementById('checkout-modal');
+    if (modal && modal.classList.contains('active')) {
+        openCheckout();
     }
 
     if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
@@ -121,13 +128,20 @@ function removeFromCart(id) {
         }
     }
     updateCartUI();
-    if (document.getElementById('checkout-modal').classList.contains('active')) {
-        openCheckout(); // Re-render modal list
+
+    // Safely re-render grid
+    const activeTabObj = document.querySelector('.tab.active');
+    if (activeTabObj) {
+        const match = activeTabObj.getAttribute('onclick').match(/'([^']+)'/);
+        const currentFilter = match ? match[1] : 'all';
+        renderProducts(currentFilter);
     }
 
-    // Re-render grid to update button state
-    const currentFilter = document.querySelector('.tab.active').getAttribute('onclick').match(/'([^']+)'/)[1];
-    renderProducts(currentFilter);
+    // Force re-render modal if active
+    const modal = document.getElementById('checkout-modal');
+    if (modal && modal.classList.contains('active')) {
+        openCheckout();
+    }
 
     if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
 }
@@ -189,7 +203,7 @@ function openCheckout() {
 
     tg.MainButton.setText(`Оплатить ${total} TJS`);
     tg.MainButton.offClick(openCheckout);
-    tg.MainButton.onClick(submitOrder);
+    tg.MainButton.onClick(proceedToPayment);
 }
 
 function closeCheckout() {
