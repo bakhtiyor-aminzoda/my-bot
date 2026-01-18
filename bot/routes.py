@@ -1,5 +1,5 @@
 from aiohttp import web
-from bot.api import get_dashboard_stats, get_bookings_list, health_check, get_order_details, update_order_status, update_order_details
+from bot.api import get_dashboard_stats, get_bookings_list, health_check, get_order_details, update_order_status, update_order_details, send_broadcast
 
 def setup_routes(app: web.Application):
     """
@@ -11,6 +11,7 @@ def setup_routes(app: web.Application):
     app.router.add_get("/api/orders/{id}", get_order_details)
     app.router.add_post("/api/orders/{id}/status", update_order_status)
     app.router.add_post("/api/orders/{id}/update", update_order_details)
+    app.router.add_post("/api/broadcast", send_broadcast)
     
     # Health check (useful for Render/Uptime monitors)
     app.router.add_get("/health", health_check)

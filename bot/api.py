@@ -3,9 +3,10 @@ from bot.database import (
     count_users, get_recent_orders, count_orders, get_order_by_id, 
     update_order_status as db_update_order_status, 
     update_order_details as db_update_order_details,
-    get_daily_stats
+    get_daily_stats, get_all_user_ids
 )
 from bot.config import ADMIN_ID
+import asyncio
 
 def require_admin(handler):
     """
@@ -68,8 +69,11 @@ async def get_dashboard_stats(request):
 
 @require_admin
 async def get_bookings_list(request):
-    """GET /api/bookings"""
-    orders = await get_recent_orders(limit=20) # Increased limit
+    """GET /api/bookings?q=search_term"""
+    search_query = request.query.get('q')
+    limit = 50 if search_query else 20 # Show more results if searching
+    
+    orders = await get_recent_orders(limit=limit, search_query=search_query)
     data = []
     for o in orders:
         data.append({
@@ -145,6 +149,32 @@ async def update_order_details(request):
         return web.json_response({"error": "Order not found"}, status=404)
 
     return web.json_response({"status": "updated"})
+
+@require_admin
+async def send_broadcast(request):
+    """
+    POST /api/broadcast
+    Body: {"message": "Hello everyone!"}
+    """
+    body = await request.json()
+    text = body.get("message")
+    
+    if not text:
+        return web.json_response({"error": "Message required"}, status=400)
+        
+    user_ids = await get_all_user_ids()
+    bot = request.app["bot"]
+    
+    count = 0
+    for uid in user_ids:
+        try:
+            await bot.send_message(chat_id=uid, text=text)
+            count += 1
+            await asyncio.sleep(0.05) # Avoid hitting limits
+        except Exception as e:
+            print(f"Broadcast fail for {uid}: {e}")
+            
+    return web.json_response({"status": "sent", "count": count})
 
 async def health_check(request):
     """Simple health check for Render."""

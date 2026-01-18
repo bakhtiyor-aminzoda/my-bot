@@ -167,12 +167,31 @@ async def add_order(user_id: int, data: dict):
         logger.info(f"📝 New order saved: {order.id}")
         return order.id
 
-async def get_recent_orders(limit: int = 10):
-    """Returns recent orders for the dashboard."""
+async def get_recent_orders(limit: int = 10, search_query: str = None):
     async with AsyncSessionLocal() as session:
-        result = await session.execute(
-            select(Order).order_by(Order.created_at.desc()).limit(limit)
-        )
+        query = select(Order).order_by(Order.created_at.desc())
+        
+        if search_query:
+            search_filter = f"%{search_query}%"
+            query = query.where(
+                (Order.name.ilike(search_filter)) | 
+                (Order.contact_info.ilike(search_filter))
+            )
+        
+        if limit:
+            query = query.limit(limit)
+            
+        result = await session.execute(query)
+        return result.scalars().all()
+
+async def get_all_user_ids():
+    """Returns a list of unique user_ids who have interacted/ordered."""
+    async with AsyncSessionLocal() as session:
+        # Assuming we want to broadcast to anyone who has an order or is in a users table
+        # Since we only have Order table with user_id for now (and maybe stats logic), 
+        # let's look at Order.user_id distinct. 
+        # Ideally we should have a Users table. For now, we use unique IDs from Orders.
+        result = await session.execute(select(Order.user_id).distinct())
         return result.scalars().all()
 
 async def count_orders():
