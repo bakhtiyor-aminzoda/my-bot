@@ -62,9 +62,18 @@
 
         <!-- Calendar / Recent Orders -->
         <section class="section-header">
-            <h3>Новые заявки</h3>
-            <button class="btn-sm">Все</button>
+            <h3>Заявки</h3>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-sm" onclick="showBroadcastModal()">📢</button>
+                <button class="btn-sm" onclick="toggleViewAll()">Все</button>
+            </div>
         </section>
+
+        <!-- Search Bar (Initially Hidden) -->
+        <div id="search-container" style="display:none; margin-bottom:16px;">
+            <input type="text" id="search-input" placeholder="Поиск по имени или телефону..."
+                style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; font-size:16px;">
+        </div>
 
         <section class="bookings-list" id="bookings-container">
             <!-- Items injected by JS -->
@@ -84,6 +93,25 @@
             </div>
             <div class="modal-actions" id="modal-actions">
                 <!-- Buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcast Modal -->
+    <div class="modal-overlay" id="broadcast-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>📢 Рассылка</h2>
+                <button class="close-btn" onclick="closeBroadcastModal()">×</button>
+            </div>
+            <div style="margin-top:16px;">
+                <p style="font-size:14px; color:var(--text-secondary); margin-bottom:12px;">
+                    Сообщение получат все пользователи бота (разово).
+                </p>
+                <textarea id="broadcast-text" rows="5" placeholder="Введите текст рассылки..."
+                    style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; font-family:inherit;"></textarea>
+                <button class="btn btn-primary" style="width:100%; margin-top:16px;" onclick="sendBroadcast()">Отправить
+                    всем</button>
             </div>
         </div>
     </div>

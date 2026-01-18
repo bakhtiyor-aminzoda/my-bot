@@ -106,16 +106,19 @@ function renderChart(chartData) {
     });
 }
 
-async function fetchBookings() {
+async function fetchBookings(query = null) {
     try {
-        const response = await fetch('/api/bookings', { headers: getHeaders() });
+        let url = '/api/bookings';
+        if (query) url += `?q=${encodeURIComponent(query)}`;
+
+        const response = await fetch(url, { headers: getHeaders() });
         const data = await response.json();
         const container = document.getElementById('bookings-container');
 
         container.innerHTML = '';
 
         if (data.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:var(--tg-theme-hint-color)">Заявок пока нет</div>';
+            container.innerHTML = '<div style="text-align:center; color:var(--tg-theme-hint-color); padding: 20px;">Ничего не найдено</div>';
             return;
         }
 
@@ -136,6 +139,89 @@ async function fetchBookings() {
         });
     } catch (e) {
         console.error(e);
+    }
+}
+
+// --- Search & View All Logic ---
+
+let isViewAll = false;
+
+function toggleViewAll() {
+    isViewAll = !isViewAll;
+    const statsGrid = document.querySelector('.stats-grid');
+    const chartCard = document.querySelector('.chart-card');
+    const searchContainer = document.getElementById('search-container');
+    const btn = document.querySelector("button[onclick='toggleViewAll()']");
+
+    if (isViewAll) {
+        // "All Orders" Mode
+        statsGrid.style.display = 'none';
+        chartCard.style.display = 'none';
+        searchContainer.style.display = 'block';
+        btn.innerText = 'Назад';
+        document.querySelector('.section-header h3').innerText = 'Все заказы';
+        fetchBookings(null); // Fetch explicit list (maybe larger limit or same)
+    } else {
+        // "Dashboard" Mode
+        statsGrid.style.display = 'grid';
+        chartCard.style.display = 'block';
+        searchContainer.style.display = 'none';
+        btn.innerText = 'Все';
+        document.getElementById('search-input').value = ''; // Clear search
+        document.querySelector('.section-header h3').innerText = 'Новые заявки';
+        fetchBookings(); // Reset
+    }
+}
+
+// Search Listener
+document.getElementById('search-input').addEventListener('keyup', (e) => {
+    // Simple debounce could be added here
+    const val = e.target.value;
+    if (val.length > 2 || val.length === 0) {
+        fetchBookings(val);
+    }
+});
+
+// --- Broadcast Logic ---
+
+function showBroadcastModal() {
+    document.getElementById('broadcast-modal').classList.add('active');
+}
+
+function closeBroadcastModal() {
+    document.getElementById('broadcast-modal').classList.remove('active');
+}
+
+async function sendBroadcast() {
+    const text = document.getElementById('broadcast-text').value;
+    if (!text) { alert("Введите текст!"); return; }
+
+    if (!confirm(`Отправить сообщение всем пользователям?`)) return;
+
+    const btn = document.querySelector("#broadcast-modal .btn-primary");
+    btn.innerText = "Отправка...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/broadcast', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ message: text })
+        });
+        const res = await response.json();
+
+        if (response.ok) {
+            alert(`✅ Успешно отправлено: ${res.count} пользователям.`);
+            closeBroadcastModal();
+            document.getElementById('broadcast-text').value = '';
+        } else {
+            alert("Ошибка рассылки");
+        }
+    } catch (e) {
+        alert("Ошибка сети");
+    } finally {
+        btn.innerText = "Отправить всем";
+        btn.disabled = false;
     }
 }
 
