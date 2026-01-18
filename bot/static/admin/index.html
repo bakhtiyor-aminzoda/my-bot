@@ -173,7 +173,22 @@
                     </div>
                     <div>
                         <label class="detail-label">Иконка</label>
-                        <input type="text" id="prod-icon" class="form-input" placeholder="🤖">
+                        <div class="icon-selector">
+                            <input type="hidden" id="prod-icon" value="📦">
+                            <div id="selected-icon-display" class="selected-icon">📦</div>
+                            <div class="emoji-grid">
+                                <span class="emoji-option" onclick="selectIcon('🤖')">🤖</span>
+                                <span class="emoji-option" onclick="selectIcon('🛍')">🛍</span>
+                                <span class="emoji-option" onclick="selectIcon('📊')">📊</span>
+                                <span class="emoji-option" onclick="selectIcon('📅')">📅</span>
+                                <span class="emoji-option" onclick="selectIcon('📢')">📢</span>
+                                <span class="emoji-option" onclick="selectIcon('💎')">💎</span>
+                                <span class="emoji-option" onclick="selectIcon('🔥')">🔥</span>
+                                <span class="emoji-option" onclick="selectIcon('🚀')">🚀</span>
+                                <span class="emoji-option" onclick="selectIcon('⚙️')">⚙️</span>
+                                <span class="emoji-option" onclick="selectIcon('👥')">👥</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

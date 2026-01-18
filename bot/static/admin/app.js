@@ -451,9 +451,10 @@ function openProductModal(product = null) {
         document.getElementById('prod-id').value = product.id;
         document.getElementById('prod-title').value = product.title;
         document.getElementById('prod-price').value = product.price;
-        document.getElementById('prod-icon').value = product.icon;
+        // document.getElementById('prod-icon').value = product.icon; // Set via selectIcon below
         document.getElementById('prod-category').value = product.category;
         document.getElementById('prod-desc').value = product.desc;
+        selectIcon(product.icon);
         document.getElementById('btn-delete-prod').style.display = 'inline-block';
     } else {
         // New Mode
@@ -464,8 +465,21 @@ function openProductModal(product = null) {
         document.getElementById('prod-icon').value = '📦';
         document.getElementById('prod-category').value = 'bots';
         document.getElementById('prod-desc').value = '';
+        document.getElementById('prod-desc').value = '';
         document.getElementById('btn-delete-prod').style.display = 'none';
+        selectIcon('📦'); // Reset default
     }
+}
+
+function selectIcon(icon) {
+    document.getElementById('prod-icon').value = icon;
+    document.getElementById('selected-icon-display').innerText = icon;
+
+    // Highlight active
+    document.querySelectorAll('.emoji-option').forEach(el => {
+        el.style.transform = el.innerText === icon ? 'scale(1.1)' : 'scale(1)';
+        el.style.border = el.innerText === icon ? '2px solid #007AFF' : 'none';
+    });
 }
 
 function closeProductModal() {
