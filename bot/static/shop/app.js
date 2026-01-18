@@ -34,24 +34,10 @@ function renderProducts(filter) {
 
     products.forEach(p => {
         if (filter !== 'all' && p.category !== filter) return;
-    });
 
-    async function fetchProducts() {
-        try {
-            const response = await fetch('/api/products');
-            if (response.ok) {
-                products = await response.json();
-                console.log("Products loaded:", products);
-            } else {
-                console.error("Failed to load products");
-            }
-        } catch (e) {
-            console.error("Error loading products:", e);
-        }
-    }
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
             <div>
                 <div class="icon-box">${p.icon}</div>
                 <h3 class="product-title">${p.title}</h3>
@@ -62,8 +48,28 @@ function renderProducts(filter) {
                 <button class="add-btn" onclick="addToCart(${p.id})">+</button>
             </div>
         `;
-    container.appendChild(card);
-});
+        container.appendChild(card);
+    });
+
+    // Update tabs UI
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.querySelector(`.tab[onclick="filter('${filter}')"]`);
+    if (activeTab) activeTab.classList.add('active');
+}
+
+async function fetchProducts() {
+    try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+            products = await response.json();
+            console.log("Products loaded:", products);
+        } else {
+            console.error("Failed to load products");
+        }
+    } catch (e) {
+        console.error("Error loading products:", e);
+    }
+}
 
 // Update tabs UI
 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
