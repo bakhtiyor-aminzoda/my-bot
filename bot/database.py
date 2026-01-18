@@ -37,6 +37,7 @@ class User(Base):
     id = Column(BigInteger, primary_key=True)
     username = Column(String, nullable=True)
     full_name = Column(String, nullable=True)
+    language_code = Column(String, default="ru")
     joined_at = Column(DateTime, default=datetime.utcnow)
 
 class Message(Base):
@@ -56,17 +57,20 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
     
     # Auto-migration: Add admin_comment if missing
-    # We use a separate transaction to avoid rolling back create_all if this fails (e.g. column exists)
     try:
         async with engine.begin() as conn:
-            # Postgres supports IF NOT EXISTS for columns, but SQLite might not.
-            # Cheapest way: Try to select the column. If fails, add it.
-            # Or just Try ADD COLUMN and catch error.
             await conn.execute(text("ALTER TABLE orders ADD COLUMN admin_comment TEXT;"))
             logger.info("🔄 Migration: Added 'admin_comment' column.")
     except Exception as e:
-        # Expected if column already exists
-        logger.info(f"ℹ️ Migration note: {e}")
+        logger.info(f"ℹ️ Migration note (orders): {e}")
+
+    # Auto-migration: Add language_code to users if missing
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN language_code VARCHAR(5) DEFAULT 'ru';"))
+            logger.info("🔄 Migration: Added 'language_code' column.")
+    except Exception as e:
+        logger.info(f"ℹ️ Migration note (users): {e}")
     
     logger.info("✅ Database initialized.")
 
@@ -81,6 +85,27 @@ async def add_user(user_id: int, username: str, full_name: str):
             session.add(new_user)
             await session.commit()
             logger.info(f"🆕 New user added: {user_id}")
+
+async def get_user_language(user_id: int):
+    """Returns user's language code (default 'ru')."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User.language_code).where(User.id == user_id))
+        lang = result.scalar_one_or_none()
+        return lang if lang else "ru"
+
+async def set_user_language(user_id: int, lang_code: str):
+    """Updates user's preferred language."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if user:
+            user.language_code = lang_code
+            await session.commit()
+        else:
+            # If user not found (rare), create them
+            new_user = User(id=user_id, language_code=lang_code)
+            session.add(new_user)
+            await session.commit()
 
 async def get_all_users():
     """Returns a list of all user IDs."""
