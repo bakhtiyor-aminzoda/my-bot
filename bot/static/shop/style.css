@@ -312,10 +312,48 @@ header {
     display: none !important;
 }
 
+
+/* Smart Cart Controls */
+.qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: #fff;
+    color: var(--accent);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+}
+
+.qty-btn:active {
+    background: #f0f0f0;
+    transform: scale(0.95);
+}
+
+.add-btn.active {
+    background: #34C759;
+    /* Green for "Added" state */
+}
+
+/* Avatar fallback styles */
 .avatar img {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
     display: block;
+    background-color: #eee;
 }
