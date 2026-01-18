@@ -7,36 +7,38 @@ from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bot.states import ApplicationState
 from bot.config import ADMIN_ID, ADMIN_USERNAME # Reverted this line to original as `add_leadADMIN_ID` is not a valid module and likely a typo in the instruction's snippet.
-from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb, budget_kb
+from bot.keyboards import main_menu_kb, cases_kb, case_action_kb, post_submit_kb, budget_kb
 
 router = Router()
 
 # --- Content Data ---
-SERVICES_INFO = {
-    "shops": (
-        "🛍 <b>Магазины в Telegram</b>\n\n"
-        "Магазин в Telegram — это не просто каталог. Это продавец, который не спит, не грубит и не путает заказы.\n\n"
-        "<b>Как это работает:</b>\n"
-        "• Клиент выбирает товары так же просто, как пишет сообщение.\n"
-        "• Корзина собирается сама.\n"
-        "• Оплата проходит за секунды.\n\n"
-        "<b>Итог:</b> Клиент нажимает кнопки — вы получаете деньги и уведомление. Без лишних переписок."
+CASES_INFO = {
+    "food": (
+        "🍔 <b>Кейс: Чат-бот доставки еды</b>\n\n"
+        "<b>Задача:</b> Клиенты долго висели на телефоне, операторы путали заказы.\n\n"
+        "<b>Решение:</b>\n"
+        "• Витрина блюд прямо в Telegram (Web App).\n"
+        "• Корзина и оплата в 2 клика.\n"
+        "• Заказ сразу улетает на кухню (принтер чеков).\n\n"
+        "<b>Итог:</b> +30% к выручке за счет доп. продаж (бот предлагает напитки)."
     ),
-    "booking": (
-        "📅 <b>Запись клиентов</b>\n\n"
-        "Забудьте про фразы: <i>«А есть окошко на 15:00?» — «Нет, только на 17:30».</i>\n\n"
-        "<b>Система берет это на себя:</b>\n"
-        "• Клиент видит свободное время и записывается сам.\n"
-        "• Бот напоминает о визите (снижаем неявку).\n"
-        "• Вы видите полное расписание.\n\n"
-        "Идеально для барбершопов, салонов красоты, врачей и консультантов."
+    "school": (
+        "🎓 <b>Кейс: Онлайн-школа</b>\n\n"
+        "<b>Задача:</b> Менеджеры вручную открывали доступы к урокам и забывали напоминать об оплате.\n\n"
+        "<b>Решение:</b>\n"
+        "• Бот сам принимает оплату и выдает ссылку на канал.\n"
+        "• Напоминает о начале вебинара за 1 час и 15 минут.\n"
+        "• Проверяет подписку каждый месяц.\n\n"
+        "<b>Итог:</b> Полная автоматизация. Владелец занимается только контентом."
     ),
-    "support": (
-        "🤖 <b>Чат-боты поддержки</b>\n\n"
-        "80% вопросов клиентов одинаковые: «Где вы находитесь?», «Сколько стоит?», «Как заказать?».\n\n"
-        "<b>Зачем тратить на это жизнь?</b>\n"
-        "Умный бот ответит мгновенно, в любое время суток.\n\n"
-        "А если вопрос сложный — он позовет живого человека. Разгрузите себя и команду."
+    "beauty": (
+        "💅 <b>Кейс: CRM для салона</b>\n\n"
+        "<b>Задача:</b> Администратор вел запись в тетради, были накладки по времени.\n\n"
+        "<b>Решение:</b>\n"
+        "• Клиент видит свободные окошки и записывается сам.\n"
+        "• Бот присылает подтверждение и напоминание.\n"
+        "• Админ видит всё расписание на телефоне.\n\n"
+        "<b>Итог:</b> Количество неявок сократилось на 40%."
     )
 }
 
@@ -182,18 +184,19 @@ async def cmd_admin_panel(message: types.Message):
     )
 
 
-@router.callback_query(F.data == "nav_services")
-async def nav_services(callback: types.CallbackQuery):
+@router.callback_query(F.data == "nav_cases")
+async def nav_cases(callback: types.CallbackQuery):
     text = (
-        "🛠 <b>Услуги</b>\n\n"
-        "Выберите категорию, чтобы узнать подробнее:"
+        "📂 <b>Наши успешные кейсы</b>\n\n"
+        "Мы превращаем проблемы в решения.\n"
+        "Выберите пример, чтобы посмотреть, как это работает:"
     )
     
     if callback.message.photo:
         await callback.message.delete()
-        await callback.message.answer(text, reply_markup=services_kb(), parse_mode="HTML")
+        await callback.message.answer(text, reply_markup=cases_kb(), parse_mode="HTML")
     else:
-        await callback.message.edit_text(text, reply_markup=services_kb(), parse_mode="HTML")
+        await callback.message.edit_text(text, reply_markup=cases_kb(), parse_mode="HTML")
     await callback.answer()
 
 @router.callback_query(F.data == "nav_about")
@@ -213,11 +216,13 @@ async def nav_back_main(callback: types.CallbackQuery, state: FSMContext):
     
     text = (
         "🏠 <b>Главное меню</b>\n\n"
+    text = (
+        "🏠 <b>Главное меню</b>\n\n"
         "Мы остановились на выборе решения.\n"
         "Куда перейдем дальше? 👇\n\n"
-        "• <b>Услуги</b> — Готовые решения для бизнеса\n"
-        "• <b>Обо мне</b> — Опыт и подход к работе\n"
-        "• <b>Заявка</b> — Обсудить индивидуальный проект"
+        "• <b>Кейсы</b> — Примеры наших работ (Портфолио)\n"
+        "• <b>О компании</b> — О нашем подходе\n"
+        "• <b>Обсудить проект</b> — Начать работу над вашей задачей"
     )
     
     base_url = os.getenv("WEBHOOK_URL", "https://google.com")
@@ -230,79 +235,19 @@ async def nav_back_main(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.edit_text(text, reply_markup=main_menu_kb(shop_url), parse_mode="HTML")
     await callback.answer()
 
-@router.callback_query(F.data == "nav_back_services")
-async def nav_back_services(callback: types.CallbackQuery):
-    # Since we came from a Photo message (Detail View), strictly delete and send new.
-    await callback.message.delete()
+@router.callback_query(F.data.startswith("case_"))
+async def show_case_detail(callback: types.CallbackQuery):
+    case_id = callback.data.split("_")[1]
+    info = CASES_INFO.get(case_id, "Информация отсутствует.")
     
-    await callback.message.answer(
-        "🛠 <b>Услуги</b>\n\n"
-        "Выберите категорию:",
-        reply_markup=services_kb(),
+    # Optional: Add images for cases later. For now, text is enough.
+    # image_file = f"case_{case_id}.png"
+    
+    await callback.message.edit_text(
+        info,
+        reply_markup=case_action_kb(),
         parse_mode="HTML"
     )
-    await callback.answer()
-
-@router.callback_query(F.data.startswith("cat_"))
-async def show_category_detail(callback: types.CallbackQuery):
-    cat_id = callback.data.split("_")[1]
-    info = SERVICES_INFO.get(cat_id, "Информация отсутствует.")
-    
-    # Image mapping
-    image_map = {
-        "shops": "shop.png",
-        "booking": "booking.png",
-        "support": "support.png"
-    }
-    
-    image_file = image_map.get(cat_id)
-    photo_path = os.path.join("bot", "images", image_file) if image_file else None
-    
-    # Delete previous menu (text)
-    await callback.message.delete()
-    
-    if photo_path and os.path.exists(photo_path):
-        photo = FSInputFile(photo_path)
-        await callback.message.answer_photo(
-            photo=photo,
-            caption=info,
-            reply_markup=service_detail_kb(cat_id),
-            parse_mode="HTML"
-        )
-    else:
-        # Fallback to text if image missing
-        await callback.message.answer(
-            info,
-            reply_markup=service_detail_kb(cat_id),
-            parse_mode="HTML"
-        )
-        
-    await callback.answer()
-
-# --- Application Flow Starters ---
-
-@router.callback_query(F.data == "new_application")
-async def start_application_direct(callback: types.CallbackQuery, state: FSMContext):
-    # Set default context for generic application
-    await state.update_data(service_context="Общая заявка")
-    await _start_fsm(callback.message, state)
-    await callback.answer()
-
-@router.callback_query(F.data.startswith("order_"))
-async def start_application_order(callback: types.CallbackQuery, state: FSMContext):
-    service_id = callback.data.split("_")[1]
-    # Map id to human readable name
-    service_names = {
-        "shops": "Интернет-магазин",
-        "booking": "Запись клиентов",
-        "support": "Чат-бот поддержки"
-    }
-    context_name = service_names.get(service_id, "Разработка бота")
-    
-    # Save context to state data
-    await state.update_data(service_context=context_name)
-    
-    await _start_fsm(callback.message, state, context_name)
     await callback.answer()
 
 from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb, budget_kb

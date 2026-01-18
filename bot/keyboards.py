@@ -11,31 +11,31 @@ def main_menu_kb(webapp_url: str = None) -> InlineKeyboardMarkup:
         kb.append([InlineKeyboardButton(text="🚀 Магазин услуг", web_app=WebAppInfo(url=webapp_url))])
     
     kb.extend([
-        [InlineKeyboardButton(text="🛠 Услуги (Текст)", callback_data="nav_services")],
+        [InlineKeyboardButton(text="📂 Наши кейсы", callback_data="nav_cases")],
         [InlineKeyboardButton(text="ℹ️ О компании", callback_data="nav_about")],
-        [InlineKeyboardButton(text="📩 Оставить заявку", callback_data="new_application")]
+        [InlineKeyboardButton(text="📞 Обсудить проект", callback_data="new_application")]
     ])
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
-def services_kb() -> InlineKeyboardMarkup:
+def cases_kb() -> InlineKeyboardMarkup:
     """
-    Services Categories Keyboard
+    Portfolio / Cases Menu
     """
     kb = [
-        [InlineKeyboardButton(text="🛍 Магазины", callback_data="cat_shops")],
-        [InlineKeyboardButton(text="📅 Запись клиентов", callback_data="cat_booking")],
-        [InlineKeyboardButton(text="🤖 Чат-боты поддержки", callback_data="cat_support")],
+        [InlineKeyboardButton(text="🍔 Доставка еды (Bot)", callback_data="case_food")],
+        [InlineKeyboardButton(text="🎓 Онлайн-школа (LMS)", callback_data="case_school")],
+        [InlineKeyboardButton(text="💅 Салон красоты (CRM)", callback_data="case_beauty")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="nav_back_main")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
-def service_detail_kb(service_id: str) -> InlineKeyboardMarkup:
+def case_action_kb() -> InlineKeyboardMarkup:
     """
-    Service Detail Keyboard (Order specific service or go back)
+    Action buttons under a specific case
     """
     kb = [
-        [InlineKeyboardButton(text="✅ Заказать это решение", callback_data=f"order_{service_id}")],
-        [InlineKeyboardButton(text="🔙 Назад к услугам", callback_data="nav_back_services")]
+        [InlineKeyboardButton(text="📞 Хочу так же", callback_data="new_application")],
+        [InlineKeyboardButton(text="🔙 К списку кейсов", callback_data="nav_cases")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
