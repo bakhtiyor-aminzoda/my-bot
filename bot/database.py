@@ -148,6 +148,7 @@ class Order(Base):
     task_description = Column(String)
     service_context = Column(String)
     status = Column(String, default="new")
+    admin_comment = Column(String, nullable=True) # Comment from Admin to Client
     created_at = Column(DateTime, default=datetime.utcnow)
 
 async def add_order(user_id: int, data: dict):
@@ -228,6 +229,7 @@ async def update_order_details(order_id: int, data: dict):
             if "budget" in data: order.budget = data["budget"]
             if "contact_info" in data: order.contact_info = data["contact_info"]
             if "task_description" in data: order.task_description = data["task_description"]
+            if "admin_comment" in data: order.admin_comment = data["admin_comment"]
             
             await session.commit()
             return order

@@ -287,17 +287,30 @@ function enableEditMode() {
     const order = currentOrder;
     const formHtml = `
         <div class="edit-form">
+            <h4 style="margin-bottom:10px; color:#007AFF;">📝 Редактирование заказа</h4>
             <label class="detail-label">Контакты</label>
-            <input type="text" id="edit-contact" value="${order.contact_info || ''}" style="width:100%; padding:8px; margin-bottom:12px; border-radius:8px; border:1px solid #ddd;">
+            <input type="text" id="edit-contact" value="${order.contact_info || ''}" class="form-input">
             
-            <label class="detail-label">Бюджет</label>
-            <input type="text" id="edit-budget" value="${order.budget || ''}" style="width:100%; padding:8px; margin-bottom:12px; border-radius:8px; border:1px solid #ddd;">
+            <label class="detail-label">Бюджет (TJS)</label>
+            <input type="text" id="edit-budget" value="${order.budget || ''}" class="form-input">
             
-            <label class="detail-label">Описание</label>
-            <textarea id="edit-desc" rows="3" style="width:100%; padding:8px; margin-bottom:12px; border-radius:8px; border:1px solid #ddd;">${order.task_description || ''}</textarea>
+            <label class="detail-label">Описание задачи</label>
+            <textarea id="edit-desc" rows="3" class="form-input">${order.task_description || ''}</textarea>
+            
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+            
+            <h4 style="margin-bottom:10px; color:#FF9500;">🤝 Переговоры с клиентом</h4>
+            <p style="font-size:12px; color:#888; margin-bottom:8px;">Оставьте комментарий и новую цену, чтобы отправить предложение клиенту.</p>
+            
+            <label class="detail-label">Комментарий для клиента</label>
+            <textarea id="edit-admin-comment" rows="2" class="form-input" placeholder="Например: Сделаем за 2500, но добавим чат-бота...">${order.admin_comment || ''}</textarea>
         
-            <button class="btn btn-primary" style="width:100%" onclick="saveOrderDetails()">Сохранить</button>
-            <button class="btn btn-sm" style="width:100%; margin-top:8px;" onclick="renderReadMode(currentOrder)">Отмена</button>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn btn-warning" style="flex:1" onclick="sendNegotiation()">📤 Предложить условия</button>
+            </div>
+            
+            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="saveOrderDetails()">💾 Просто сохранить (без отправки)</button>
+            <button class="btn btn-sm" style="width:100%; margin-top:8px; background:none; color: #888;" onclick="renderReadMode(currentOrder)">Отмена</button>
         </div>
     `;
     document.getElementById('read-view').style.display = 'none';
@@ -307,6 +320,36 @@ function enableEditMode() {
 
     // Hide main actions while editing
     document.getElementById('modal-actions').style.display = 'none';
+}
+
+async function sendNegotiation() {
+    const data = {
+        contact_info: document.getElementById('edit-contact').value,
+        budget: document.getElementById('edit-budget').value,
+        task_description: document.getElementById('edit-desc').value,
+        admin_comment: document.getElementById('edit-admin-comment').value
+    };
+
+    if (!confirm("Отправить это предложение клиенту в Telegram?")) return;
+
+    try {
+        const response = await fetch(`/api/orders/${currentOrder.id}/negotiate`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert("✅ Предложение отправлено клиенту!");
+            currentOrder = { ...currentOrder, ...data, status: 'negotiation_pending' };
+            renderReadMode(currentOrder);
+            document.getElementById('modal-actions').style.display = 'grid';
+        } else {
+            alert("Ошибка отправки");
+        }
+    } catch (e) {
+        alert("Ошибка сети");
+    }
 }
 
 async function saveOrderDetails() {

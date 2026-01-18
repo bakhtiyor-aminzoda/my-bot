@@ -152,6 +152,49 @@ async def update_order_details(request):
     return web.json_response({"status": "updated"})
 
 @require_admin
+async def negotiate_order(request):
+    """
+    POST /api/orders/{id}/negotiate
+    Body: {"budget": "...", "admin_comment": "..."}
+    """
+    order_id = int(request.match_info['id'])
+    body = await request.json()
+    
+    # Update Details (Budget, Comment)
+    updated_order = await db_update_order_details(order_id, body)
+    if not updated_order:
+        return web.json_response({"error": "Order not found"}, status=404)
+        
+    # Update Status to pending negotiation
+    await db_update_order_status(order_id, "negotiation_pending")
+    
+    # Notify User via Bot with Buttons
+    bot = request.app["bot"]
+    user_id = updated_order.user_id
+    
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Принять условия", callback_data=f"negotiation_accept_{order_id}")],
+        [InlineKeyboardButton(text="❌ Отказаться", callback_data=f"negotiation_reject_{order_id}")]
+    ])
+    
+    msg_text = (
+        f"💬 <b>Ответ от администратора</b>\n\n"
+        f"Ваш заказ: <b>{updated_order.service_context or 'Заказ'}</b>\n"
+        f"Предлагаемый бюджет: <b>{updated_order.budget}</b>\n\n"
+        f"<b>Комментарий:</b>\n{updated_order.admin_comment}\n\n"
+        f"Подходит ли вам это предложение?"
+    )
+    
+    try:
+        await bot.send_message(chat_id=user_id, text=msg_text, reply_markup=kb, parse_mode="HTML")
+    except Exception as e:
+        print(f"Failed to notify user: {e}")
+        # We don't fail the request, just log it, as the DB update succeeded.
+        
+    return web.json_response({"status": "negotiation_started"})
+
+@require_admin
 async def send_broadcast(request):
     """
     POST /api/broadcast
