@@ -483,7 +483,8 @@ async def process_negotiation(callback: types.CallbackQuery):
             try:
                 await callback.bot.send_message(
                     chat_id=ADMIN_ID, 
-                    text=f"✅ <b>Клиент принял условия!</b>\nЗаказ #{order_id} теперь в работе."
+                    text=f"✅ <b>Клиент принял условия!</b>\nЗаказ #{order_id} теперь в работе.",
+                    parse_mode="HTML"
                 )
             except Exception: pass
             
