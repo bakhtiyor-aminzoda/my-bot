@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Amini Store</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <img src="https://via.placeholder.com/40" class="logo" alt="Logo">
+                <div>
+                    <h1 class="brand-name">Amini Services</h1>
+                    <p class="subtitle">Автоматизация бизнеса</p>
+                </div>
+            </div>
+            <div class="avatar">
+                <img src="https://via.placeholder.com/40" id="user-avatar" alt="User">
+            </div>
+        </header>
+
+        <!-- Banner -->
+        <div class="banner">
+            <h2>Будущее уже здесь 🚀</h2>
+            <p>Выберите решение, которое ускорит ваш бизнес.</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="filter('all')">Все</button>
+            <button class="tab" onclick="filter('bots')">Боты</button>
+            <button class="tab" onclick="filter('crm')">CRM</button>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid" id="product-grid">
+            <!-- Injected via JS -->
+        </div>
+
+        <!-- Floating Cart -->
+        <div class="cart-btn" id="cart-btn" onclick="openCheckout()">
+            <div class="cart-icon">🛍</div>
+            <span class="cart-count" id="cart-count">0</span>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Ваш заказ</h2>
+                <button class="close-btn" onclick="closeCheckout()">×</button>
+            </div>
+
+            <div id="cart-items" class="cart-items">
+                <!-- Items list -->
+            </div>
+
+            <div class="checkout-footer">
+                <div class="total-row">
+                    <span>Итого:</span>
+                    <span id="cart-total">0 TJS</span>
+                </div>
+
+                <input type="text" id="order-comment" placeholder="Комментарий к заказу..." class="input-field">
+
+                <div id="contact-section" style="margin-bottom:12px;">
+                    <p style="font-size:12px; color:#888; margin-bottom:4px;">Ваш контакт:</p>
+                    <input type="text" id="order-contact" class="input-field" placeholder="+992...">
+                </div>
+
+                <button class="btn-primary" onclick="submitOrder()">Оформить заказ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

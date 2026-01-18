@@ -1,0 +1,363 @@
+:root {
+    --bg-color: #f7f9fc;
+    --card-bg: #ffffff;
+    --text-primary: #1c1c1e;
+    --text-secondary: #8e8e93;
+    --accent: #007AFF;
+    --accent-gradient: linear-gradient(135deg, #007AFF, #00C6FF);
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
+    --radius: 16px;
+    --radius-lg: 24px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    padding: 20px;
+    padding-bottom: 80px;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+}
+
+.brand-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
+
+.avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Banner */
+.banner {
+    background: var(--accent-gradient);
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 20px rgba(0, 122, 255, 0.2);
+}
+
+.banner h2 {
+    margin: 0 0 4px 0;
+    font-size: 22px;
+}
+
+.banner p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.tab {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab.active {
+    background: var(--text-primary);
+    color: white;
+    border-color: var(--text-primary);
+}
+
+/* Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.1s;
+}
+
+.product-card:active {
+    transform: scale(0.98);
+}
+
+.icon-box {
+    width: 48px;
+    height: 48px;
+    background: #f0f2f5;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.product-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.product-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.add-btn {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Floating Cart */
+.cart-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: var(--text-primary);
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    z-index: 100;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.cart-btn:active {
+    transform: scale(0.9);
+}
+
+.cart-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ff3b30;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    /* Bottom sheet style */
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-card {
+    background: white;
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.close-btn {
+    background: #f0f2f5;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+}
+
+.cart-items {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-item-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.cart-item-price {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.checkout-footer {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    background: #f9f9f9;
+    font-size: 16px;
+    margin-bottom: 12px;
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: var(--accent);
+    background: white;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
