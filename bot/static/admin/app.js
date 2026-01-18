@@ -8,10 +8,31 @@ let chartInstance = null;
 const ADMIN_ID = 409951664; // Fallback if not strictly enforcing backend
 
 // Apply theme
-if (tg.themeParams) {
-    document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-    document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    } else if (tg.colorScheme === 'dark') {
+        // Auto-detect Telegram theme logic (optional, we use manual toggle mostly)
+        // document.body.classList.add('dark-mode'); 
+    }
+
+    // Fallback for native colors if Telegram web app is not giving them
+    if (tg.themeParams && tg.themeParams.bg_color) {
+        // We override these if we want manual control, or we respect them.
+        // For our Custom Dark Mode, we ignore tg.themeParams bg_color for body background
+        // but we might use them elsewhere.
+    }
 }
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+}
+
+initTheme();
 
 // Auth Header helper
 function getHeaders() {

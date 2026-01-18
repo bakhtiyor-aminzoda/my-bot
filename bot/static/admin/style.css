@@ -14,6 +14,15 @@
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+body.dark-mode {
+    --bg-color: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e93;
+    --card-bg: rgba(28, 28, 30, 0.8);
+    --shadow-sm: 0 4px 12px rgba(255, 255, 255, 0.05);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-primary);
