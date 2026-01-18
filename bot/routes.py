@@ -1,5 +1,5 @@
 from aiohttp import web
-from bot.api import get_dashboard_stats, get_bookings_list, health_check, get_order_details, update_order_status, update_order_details, send_broadcast
+from bot.api import get_dashboard_stats, get_bookings_list, health_check, get_order_details, update_order_status, update_order_details, send_broadcast, create_client_order
 
 def setup_routes(app: web.Application):
     """
@@ -12,6 +12,7 @@ def setup_routes(app: web.Application):
     app.router.add_post("/api/orders/{id}/status", update_order_status)
     app.router.add_post("/api/orders/{id}/update", update_order_details)
     app.router.add_post("/api/broadcast", send_broadcast)
+    app.router.add_post("/api/client/orders", create_client_order)
     
     # Health check (useful for Render/Uptime monitors)
     app.router.add_get("/health", health_check)
@@ -21,3 +22,4 @@ def setup_routes(app: web.Application):
     # We serve the 'bot/static' folder at root or /admin
     # For simplicity, let's serve /admin/ -> bot/static/admin/index.html
     app.router.add_static("/admin", path="bot/static/admin", name="admin")
+    app.router.add_static("/shop", path="bot/static/shop", name="shop")
