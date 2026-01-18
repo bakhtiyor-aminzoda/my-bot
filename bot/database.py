@@ -224,6 +224,13 @@ async def get_recent_orders(limit: int = 10, search_query: str = None):
         result = await session.execute(query)
         return result.scalars().all()
 
+async def get_user_orders(user_id: int):
+    """Returns all orders for a specific user."""
+    async with AsyncSessionLocal() as session:
+        query = select(Order).where(Order.user_id == user_id).order_by(Order.created_at.desc())
+        result = await session.execute(query)
+        return result.scalars().all()
+
 async def get_all_user_ids():
     """Returns a list of unique user_ids who have interacted/ordered."""
     async with AsyncSessionLocal() as session:

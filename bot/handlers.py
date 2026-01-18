@@ -87,14 +87,57 @@ async def get_main_keyboard_dynamic(user_id: int):
     t_cases = await get_text(user_id, "btn_cases")
     t_about = await get_text(user_id, "btn_about")
     t_discuss = await get_text(user_id, "btn_discuss")
+    t_my_orders = await get_text(user_id, "btn_my_orders")
     
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=t_store, web_app=WebAppInfo(url=shop_url))],
+        [InlineKeyboardButton(text=t_my_orders, callback_data="my_orders")],
         [InlineKeyboardButton(text=t_cases, callback_data="nav_cases"), 
          InlineKeyboardButton(text=t_about, callback_data="nav_about")],
         [InlineKeyboardButton(text=t_discuss, callback_data="new_application")]
     ])
+
+# ... cmd_start ...
+
+@router.callback_query(F.data == "my_orders")
+async def show_my_orders(callback: types.CallbackQuery):
+    from bot.database import get_user_orders
+    orders = await get_user_orders(callback.from_user.id)
+    
+    header = await get_text(callback.from_user.id, "header_my_orders")
+    no_orders = await get_text(callback.from_user.id, "no_orders")
+    back_text = await get_text(callback.from_user.id, "btn_back")
+    
+    if not orders:
+        text = header + no_orders
+    else:
+        text = header
+        for o in orders:
+            # Localize status
+            status_key = f"status_{o.status}"
+            status_text = await get_text(callback.from_user.id, status_key)
+            
+            date_str = o.created_at.strftime("%d.%m.%Y")
+            budget_str = o.budget if o.budget else "—"
+            
+            text += (
+                f"🔹 <b>Заказ #{o.id}</b>\n"
+                f"📅 {date_str} • {status_text}\n"
+                f"📝 {o.service_context}\n"
+                f"💰 {budget_str}\n\n"
+            )
+            
+    kb = types.InlineKeyboardMarkup(inline_keyboard=[
+        [types.InlineKeyboardButton(text=back_text, callback_data="nav_back_main")]
+    ])
+    
+    if callback.message.photo:
+        await callback.message.delete()
+        await callback.message.answer(text, reply_markup=kb, parse_mode="HTML")
+    else:
+        await callback.message.edit_text(text, reply_markup=kb, parse_mode="HTML")
+    await callback.answer()
 
 @router.message(CommandStart())
 async def cmd_start(message: types.Message, state: FSMContext):
