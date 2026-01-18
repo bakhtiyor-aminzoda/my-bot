@@ -12,7 +12,7 @@ def main_menu_kb(webapp_url: str = None) -> InlineKeyboardMarkup:
     
     kb.extend([
         [InlineKeyboardButton(text="🛠 Услуги (Текст)", callback_data="nav_services")],
-        [InlineKeyboardButton(text="ℹ️ Обо мне", callback_data="nav_about")],
+        [InlineKeyboardButton(text="ℹ️ О компании", callback_data="nav_about")],
         [InlineKeyboardButton(text="📩 Оставить заявку", callback_data="new_application")]
     ])
     return InlineKeyboardMarkup(inline_keyboard=kb)
