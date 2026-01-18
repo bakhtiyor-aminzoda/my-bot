@@ -216,8 +216,6 @@ async def nav_back_main(callback: types.CallbackQuery, state: FSMContext):
     
     text = (
         "🏠 <b>Главное меню</b>\n\n"
-    text = (
-        "🏠 <b>Главное меню</b>\n\n"
         "Мы остановились на выборе решения.\n"
         "Куда перейдем дальше? 👇\n\n"
         "• <b>Кейсы</b> — Примеры наших работ (Портфолио)\n"
@@ -345,24 +343,7 @@ async def process_task_description(message: types.Message, state: FSMContext):
         parse_mode="HTML"
     )
 
-@router.message(ApplicationState.task_description)
-async def process_task_description(message: types.Message, state: FSMContext):
-    if not message.text:
-        await message.answer("Пожалуйста, опишите задачу текстом.")
-        return
 
-    await state.update_data(task_description=message.text)
-    await state.set_state(ApplicationState.contact_info)
-    
-    # Request Contact Keyboard
-    kb = [[types.KeyboardButton(text="📱 Отправить номер телефона", request_contact=True)]]
-    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
-    
-    await message.answer(
-        "Как с вами удобнее связаться?\n"
-        "Нажмите кнопку ниже, чтобы отправить номер телефона, или напишите его вручную.",
-        reply_markup=keyboard
-    )
 
 @router.message(ApplicationState.contact_info)
 async def process_contact_info(message: types.Message, state: FSMContext):
