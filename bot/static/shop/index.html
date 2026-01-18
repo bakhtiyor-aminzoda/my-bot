@@ -78,6 +78,41 @@
         </div>
     </div>
 
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="payment-modal" style="z-index: 205;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Оплата заказа</h2>
+                <button class="close-btn" onclick="closePayment()">×</button>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 24px;">
+                <p style="color: var(--text-secondary); margin-bottom: 8px;">К оплате:</p>
+                <h1 id="payment-amount" style="font-size: 32px; margin: 0; color: var(--text-primary);">0 TJS</h1>
+            </div>
+
+            <div class="payment-box">
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Перевод на карту (Alif /
+                    Korti):</p>
+                <div class="card-number-box" onclick="copyCardNumber()">
+                    <span id="card-number">5058 2700 1234 5678</span>
+                    <span class="copy-icon">📋</span>
+                </div>
+                <div id="copy-feedback"
+                    style="font-size:12px; color:var(--success); height:16px; margin-top:4px; opacity:0; transition:opacity 0.2s;">
+                    Скопировано!</div>
+            </div>
+
+            <div class="qr-container">
+                <div
+                    style="width: 150px; height: 150px; background: #f0f0f0; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px dashed #ccc;">
+                    <span style="font-size: 40px; opacity: 0.5;">QR</span>
+                </div>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 12px;">Сканируйте для оплаты</p>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 
