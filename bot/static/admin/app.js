@@ -389,6 +389,147 @@ fetchStats();
 fetchBookings();
 fetchUser();
 
+// --- Tab Logic ---
+function switchTab(tab) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('#dashboard-view, #products-view').forEach(el => el.style.display = 'none');
+
+    if (tab === 'dashboard') {
+        document.getElementById('dashboard-view').style.display = 'block';
+        document.querySelector('.nav-item[onclick="switchTab(\'dashboard\')"]').classList.add('active');
+        document.getElementById('page-title').innerText = 'Панель управления';
+    } else {
+        document.getElementById('products-view').style.display = 'block';
+        document.querySelector('.nav-item[onclick="switchTab(\'products\')"]').classList.add('active');
+        document.getElementById('page-title').innerText = 'Управление товарами';
+        fetchAdminProducts();
+    }
+
+    if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+}
+
+// --- Product Management ---
+
+async function fetchAdminProducts() {
+    const list = document.getElementById('products-list');
+    list.innerHTML = '<div class="loading-spinner">Загрузка...</div>';
+
+    try {
+        const response = await fetch('/api/products', { headers: getHeaders() });
+        const products = await response.json();
+
+        list.innerHTML = '';
+        products.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'product-item';
+            div.onclick = () => openProductModal(p);
+            div.innerHTML = `
+                <div class="prod-icon-box">${p.icon}</div>
+                <div class="prod-info">
+                    <h4 class="prod-title">${p.title}</h4>
+                    <span class="prod-price">${p.price} TJS</span>
+                </div>
+                <div style="color: #ccc;">›</div>
+            `;
+            list.appendChild(div);
+        });
+    } catch (e) {
+        list.innerHTML = 'Ошибка загрузки';
+    }
+}
+
+let currentProduct = null;
+
+function openProductModal(product = null) {
+    const modal = document.getElementById('product-modal');
+    modal.classList.add('active');
+    currentProduct = product;
+
+    if (product) {
+        // Edit Mode
+        document.getElementById('product-modal-title').innerText = 'Редактировать';
+        document.getElementById('prod-id').value = product.id;
+        document.getElementById('prod-title').value = product.title;
+        document.getElementById('prod-price').value = product.price;
+        document.getElementById('prod-icon').value = product.icon;
+        document.getElementById('prod-category').value = product.category;
+        document.getElementById('prod-desc').value = product.desc;
+        document.getElementById('btn-delete-prod').style.display = 'inline-block';
+    } else {
+        // New Mode
+        document.getElementById('product-modal-title').innerText = 'Новый товар';
+        document.getElementById('prod-id').value = '';
+        document.getElementById('prod-title').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-icon').value = '📦';
+        document.getElementById('prod-category').value = 'bots';
+        document.getElementById('prod-desc').value = '';
+        document.getElementById('btn-delete-prod').style.display = 'none';
+    }
+}
+
+function closeProductModal() {
+    document.getElementById('product-modal').classList.remove('active');
+}
+
+async function saveProduct() {
+    const id = document.getElementById('prod-id').value;
+    const data = {
+        title: document.getElementById('prod-title').value,
+        price: Number(document.getElementById('prod-price').value),
+        icon: document.getElementById('prod-icon').value,
+        category: document.getElementById('prod-category').value,
+        desc: document.getElementById('prod-desc').value
+    };
+
+    if (!data.title || !data.price) {
+        alert("Заполните название и цену");
+        return;
+    }
+
+    const url = id ? `/api/products/${id}` : '/api/products';
+    const method = id ? 'PUT' : 'POST';
+
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            closeProductModal();
+            fetchAdminProducts();
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        } else {
+            alert("Ошибка сохранения");
+        }
+    } catch (e) {
+        alert("Ошибка сети");
+    }
+}
+
+async function deleteProduct() {
+    if (!currentProduct || !confirm("Удалить этот товар?")) return;
+
+    try {
+        const response = await fetch(`/api/products/${currentProduct.id}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        });
+
+        if (response.ok) {
+            closeProductModal();
+            fetchAdminProducts();
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        } else {
+            alert("Ошибка удаления");
+        }
+    } catch (e) {
+        alert("Ошибка сети");
+    }
+}
+
 function fetchUser() {
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const user = tg.initDataUnsafe.user;

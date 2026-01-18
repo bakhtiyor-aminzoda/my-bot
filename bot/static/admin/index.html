@@ -16,7 +16,7 @@
         <!-- Header -->
         <header>
             <div class="header-content">
-                <h1>Панель управления</h1>
+                <h1 id="page-title">Панель управления</h1>
                 <p class="subtitle">С возвращением, Шеф 👋</p>
             </div>
             <div class="avatar">
@@ -24,61 +24,95 @@
             </div>
         </header>
 
-        <!-- Stats Grid -->
-        <section class="stats-grid">
-            <div class="card stat-card blue">
-                <div class="icon">👥</div>
-                <div class="info">
-                    <span class="label">Пользователи</span>
-                    <h2 id="total-users">...</h2>
+        <!-- VIEWS CONTAINER -->
+        <main id="main-content" style="padding-bottom: 80px;">
+
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard-view">
+
+                <!-- Stats Grid -->
+                <section class="stats-grid">
+                    <div class="card stat-card blue">
+                        <div class="icon">👥</div>
+                        <div class="info">
+                            <span class="label">Пользователи</span>
+                            <h2 id="total-users">...</h2>
+                        </div>
+                    </div>
+                    <div class="card stat-card green">
+                        <div class="icon">💰</div>
+                        <div class="info">
+                            <span class="label">Выручка</span>
+                            <h2 id="revenue">...</h2>
+                        </div>
+                    </div>
+                    <div class="card stat-card purple">
+                        <div class="icon">📦</div>
+                        <div class="info">
+                            <span class="label">Заказы</span>
+                            <h2 id="active-orders">...</h2>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Chart Section -->
+                <section class="chart-card">
+                    <div class="chart-header">
+                        <h3>Динамика заказов</h3>
+                        <span class="chart-period">7 дней</span>
+                    </div>
+                    <div style="position: relative; height: 200px; width: 100%">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Calendar / Recent Orders -->
+                <section class="section-header">
+                    <h3>Заявки</h3>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-sm" onclick="showBroadcastModal()">📢</button>
+                        <button class="btn-sm" onclick="toggleViewAll()">Все</button>
+                    </div>
+                </section>
+
+                <!-- Search Bar (Initially Hidden) -->
+                <div id="search-container" style="display:none; margin-bottom:16px;">
+                    <input type="text" id="search-input" placeholder="Поиск по имени или телефону..."
+                        style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; font-size:16px;">
+                </div>
+
+                <section class="bookings-list" id="bookings-container">
+                    <!-- Items injected by JS -->
+                    <div class="loading-spinner">Загрузка...</div>
+                </section>
+
+            </div> <!-- End Dashboard View -->
+
+            <!-- PRODUCTS VIEW -->
+            <div id="products-view" style="display: none;">
+                <section class="section-header">
+                    <h3>Товары и Услуги</h3>
+                    <button class="btn-sm" onclick="openProductModal()">+ Добавить</button>
+                </section>
+
+                <div id="products-list" class="products-grid">
+                    <!-- Injected by JS -->
                 </div>
             </div>
-            <div class="card stat-card green">
-                <div class="icon">💰</div>
-                <div class="info">
-                    <span class="label">Выручка</span>
-                    <h2 id="revenue">...</h2>
-                </div>
-            </div>
-            <div class="card stat-card purple">
-                <div class="icon">📦</div>
-                <div class="info">
-                    <span class="label">Заказы</span>
-                    <h2 id="active-orders">...</h2>
-                </div>
-            </div>
-        </section>
 
-        <!-- Chart Section -->
-        <section class="chart-card">
-            <div class="chart-header">
-                <h3>Динамика заказов</h3>
-                <span class="chart-period">7 дней</span>
-            </div>
-            <div style="position: relative; height: 200px; width: 100%">
-                <canvas id="ordersChart"></canvas>
-            </div>
-        </section>
+        </main>
 
-        <!-- Calendar / Recent Orders -->
-        <section class="section-header">
-            <h3>Заявки</h3>
-            <div style="display:flex; gap:8px;">
-                <button class="btn-sm" onclick="showBroadcastModal()">📢</button>
-                <button class="btn-sm" onclick="toggleViewAll()">Все</button>
-            </div>
-        </section>
-
-        <!-- Search Bar (Initially Hidden) -->
-        <div id="search-container" style="display:none; margin-bottom:16px;">
-            <input type="text" id="search-input" placeholder="Поиск по имени или телефону..."
-                style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; font-size:16px;">
-        </div>
-
-        <section class="bookings-list" id="bookings-container">
-            <!-- Items injected by JS -->
-            <div class="loading-spinner">Загрузка...</div>
-        </section>
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchTab('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Главная</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('products')">
+                <span class="nav-icon">🛍</span>
+                <span class="nav-label">Товары</span>
+            </button>
+        </nav>
     </div>
 
     <!-- Detail Modal -->
@@ -112,6 +146,51 @@
                     style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; font-family:inherit;"></textarea>
                 <button class="btn btn-primary" style="width:100%; margin-top:16px;" onclick="sendBroadcast()">Отправить
                     всем</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="product-modal-title">Новый товар</h2>
+                <button class="close-btn" onclick="closeProductModal()">×</button>
+            </div>
+            <div style="margin-top:16px;">
+                <input type="hidden" id="prod-id">
+
+                <label class="detail-label">Название</label>
+                <input type="text" id="prod-title" class="form-input" placeholder="Например: Супер Бот">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label class="detail-label">Цена (TJS)</label>
+                        <input type="number" id="prod-price" class="form-input" placeholder="5000">
+                    </div>
+                    <div>
+                        <label class="detail-label">Иконка</label>
+                        <input type="text" id="prod-icon" class="form-input" placeholder="🤖">
+                    </div>
+                </div>
+
+                <label class="detail-label">Категория</label>
+                <select id="prod-category" class="form-input"
+                    style="background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color);">
+                    <option value="bots">Чат-боты</option>
+                    <option value="crm">CRM Системы</option>
+                    <option value="other">Разное</option>
+                </select>
+
+                <label class="detail-label">Описание</label>
+                <textarea id="prod-desc" rows="3" class="form-input" placeholder="Краткое описание..."></textarea>
+
+                <div class="modal-actions" style="margin-top:20px;">
+                    <button class="btn btn-primary" onclick="saveProduct()">Сохранить</button>
+                    <button class="btn btn-danger" id="btn-delete-prod" onclick="deleteProduct()"
+                        style="display:none">Удалить</button>
+                </div>
             </div>
         </div>
     </div>
