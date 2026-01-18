@@ -1,2 +1,7 @@
+aiogram
+aiohttp
+sqlalchemy[asyncio]
+asyncpg
 aiosqlite
+python-dotenv
 greenlet
