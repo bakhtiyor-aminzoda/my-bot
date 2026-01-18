@@ -230,6 +230,7 @@ async function sendBroadcast() {
 async function showDetails(id) {
     const modal = document.getElementById('detail-modal');
     modal.classList.add('active');
+    document.body.classList.add('no-scroll'); // Lock scroll
 
     // Reset Edit Mode
     document.getElementById('modal-content').classList.remove('editing');
@@ -285,32 +286,47 @@ function renderReadMode(order) {
 
 function enableEditMode() {
     const order = currentOrder;
+    // Strip non-numeric chars for editing if needed, or just keep as is but remove TJS suffix
+    const numericBudget = (order.budget || '').replace(' TJS', '').trim();
+
     const formHtml = `
         <div class="edit-form">
-            <h4 style="margin-bottom:10px; color:#007AFF;">📝 Редактирование заказа</h4>
-            <label class="detail-label">Контакты</label>
-            <input type="text" id="edit-contact" value="${order.contact_info || ''}" class="form-input">
+            <h4 style="margin-bottom:15px; color:#007AFF;">📝 Редактирование заказа</h4>
+            
+            <label class="detail-label">Контакты (только чтение)</label>
+            <input type="text" id="edit-contact" value="${order.contact_info || ''}" class="form-input" disabled style="background:#f0f0f5; color:#666;">
+            
+            <label class="detail-label">Описание (только чтение)</label>
+            <textarea id="edit-desc" rows="3" class="form-input" disabled style="background:#f0f0f5; color:#666;">${order.task_description || ''}</textarea>
             
             <label class="detail-label">Бюджет (TJS)</label>
-            <input type="text" id="edit-budget" value="${order.budget || ''}" class="form-input">
-            
-            <label class="detail-label">Описание задачи</label>
-            <textarea id="edit-desc" rows="3" class="form-input">${order.task_description || ''}</textarea>
-            
-            <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
-            
-            <h4 style="margin-bottom:10px; color:#FF9500;">🤝 Переговоры с клиентом</h4>
-            <p style="font-size:12px; color:#888; margin-bottom:8px;">Оставьте комментарий и новую цену, чтобы отправить предложение клиенту.</p>
-            
-            <label class="detail-label">Комментарий для клиента</label>
-            <textarea id="edit-admin-comment" rows="2" class="form-input" placeholder="Например: Сделаем за 2500, но добавим чат-бота...">${order.admin_comment || ''}</textarea>
-        
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn btn-warning" style="flex:1" onclick="sendNegotiation()">📤 Предложить условия</button>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <input type="number" id="edit-budget" value="${numericBudget}" class="form-input" style="margin-bottom:12px; font-weight:bold; font-size:16px;">
+                <span style="font-weight:600; margin-bottom:12px;">TJS</span>
             </div>
             
-            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="saveOrderDetails()">💾 Просто сохранить (без отправки)</button>
-            <button class="btn btn-sm" style="width:100%; margin-top:8px; background:none; color: #888;" onclick="renderReadMode(currentOrder)">Отмена</button>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e1e1e1;">
+            
+            <h4 style="margin-bottom:10px; color:#FF9500;">🤝 Переговоры с клиентом</h4>
+            <div style="background:#FFF8E8; padding:12px; border-radius:10px; margin-bottom:15px;">
+                <p style="font-size:13px; color:#D98200; line-height:1.4;">
+                    Измените <b>Бюджет</b> выше и напишите комментарий ниже. Клиент получит кнопку "Принять" или "Отказать".
+                </p>
+            </div>
+            
+            <label class="detail-label">Комментарий для клиента</label>
+            <textarea id="edit-admin-comment" rows="3" class="form-input" 
+                placeholder="Здравствуйте! Мы изучили задачу. Готовы выполнить за..." 
+                style="border-color:#FF9500;">${order.admin_comment || ''}</textarea>
+        
+            <button class="btn btn-warning" style="width:100%; padding:14px; margin-top:10px; font-weight:600;" onclick="sendNegotiation()">
+                📤 Отправить предложение клиенту
+            </button>
+            
+            <div style="margin-top:15px; display:flex; gap:10px;">
+                <button class="btn btn-secondary" style="flex:1;" onclick="saveOrderDetails()">💾 Сохранить</button>
+                <button class="btn btn-sm" style="flex:1; background:white; border:1px solid #ddd;" onclick="renderReadMode(currentOrder)">Отмена</button>
+            </div>
         </div>
     `;
     document.getElementById('read-view').style.display = 'none';
@@ -323,14 +339,15 @@ function enableEditMode() {
 }
 
 async function sendNegotiation() {
+    const budgetVal = document.getElementById('edit-budget').value;
     const data = {
         contact_info: document.getElementById('edit-contact').value,
-        budget: document.getElementById('edit-budget').value,
+        budget: budgetVal + ' TJS',
         task_description: document.getElementById('edit-desc').value,
         admin_comment: document.getElementById('edit-admin-comment').value
     };
 
-    if (!confirm("Отправить это предложение клиенту в Telegram?")) return;
+    if (!confirm(`Отправить предложение с ценой ${budgetVal} TJS?`)) return;
 
     try {
         const response = await fetch(`/api/orders/${currentOrder.id}/negotiate`, {
@@ -340,12 +357,13 @@ async function sendNegotiation() {
         });
 
         if (response.ok) {
-            alert("✅ Предложение отправлено клиенту!");
+            alert("✅ Предложение отправлено!");
             currentOrder = { ...currentOrder, ...data, status: 'negotiation_pending' };
             renderReadMode(currentOrder);
             document.getElementById('modal-actions').style.display = 'grid';
         } else {
-            alert("Ошибка отправки");
+            const err = await response.json();
+            alert("Ошибка: " + (err.error || "Неизвестная ошибка"));
         }
     } catch (e) {
         alert("Ошибка сети");
@@ -402,6 +420,7 @@ function renderActions(order) {
 
 function closeModal() {
     document.getElementById('detail-modal').classList.remove('active');
+    document.body.classList.remove('no-scroll'); // Unlock scroll
 }
 
 async function updateStatus(id, status) {
