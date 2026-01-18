@@ -539,9 +539,8 @@ async def process_negotiation(callback: types.CallbackQuery):
         from bot.config import ADMIN_ID
         
         if action_type == "accept":
-            # 1. Update status
-            updated_order = await update_order_status(order_id, "in_progress")
-            if not updated_order:
+            updated = await update_order_status(order_id, "in_progress")
+            if not updated:
                 await callback.answer("Ошибка: заказ не найден", show_alert=True)
                 return
 
@@ -551,45 +550,14 @@ async def process_negotiation(callback: types.CallbackQuery):
             except Exception:
                 await callback.message.answer(msg_text, parse_mode="HTML")
 
-            # 2. Generate PDF Invoice
+            # Notify Admin
             try:
-                from bot.pdf_generator import create_invoice_pdf
-                
-                # Fetch fresh order data or use updated_order
-                # Need name and service context. updated_order is the Order object.
-                price = updated_order.budget if updated_order.budget else "Не указано"
-                # Strip text like " (1000-2000 с.)" if it exists to get numbers, or just pass raw string.
-                # The PDF gen accepts raw string for price_tjs.
-                
-                pdf_path = create_invoice_pdf(
-                    order_id=updated_order.id,
-                    client_name=updated_order.name,
-                    service_name=updated_order.service_context,
-                    price_tjs=price
-                )
-                
-                # 3. Send PDF to User
-                await callback.message.answer_document(
-                    FSInputFile(pdf_path),
-                    caption="📄 <b>Ваш счет на оплату</b>\nСпасибо за доверие!",
-                    parse_mode="HTML"
-                )
-                
-                # 4. Notify Admin with PDF
                 await callback.bot.send_message(
                     chat_id=ADMIN_ID, 
                     text=f"✅ <b>Клиент принял условия!</b>\nЗаказ #{order_id} теперь в работе.",
                     parse_mode="HTML"
                 )
-                await callback.bot.send_document(
-                    chat_id=ADMIN_ID,
-                    document=FSInputFile(pdf_path),
-                    caption=f"📄 Счет для заказа #{order_id}"
-                )
-                
-            except Exception as e:
-                print(f"PDF Gen Error: {e}")
-                # Don't fail the whole flow if PDF fails, just log
+            except Exception: pass
             
         elif action_type == "reject":
             await update_order_status(order_id, "cancelled")
