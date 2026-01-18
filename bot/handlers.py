@@ -50,8 +50,8 @@ ABOUT_TEXT = (
     "<b>Почему мы:</b>\n"
     "Хаос убивает бизнес. Мы превращаем хаос в порядок, автоматизируя рутину, чтобы вы занимались стратегией.\n\n"
     "📱 <b>Контакты:</b>\n"
-    "• <a href='https://instagram.com/starik.ai'>CEO: @starik.ai</a>\n"
-    "• <a href='https://t.me/amini_support'>Поддержка</a>"
+    "• <a href='https://instagram.com/aminzoda.03'>CEO: @aminzoda.03</a>\n"
+    "• <a href='https://instagram.com/amini.automation'>Мы в Instagram: @amini.automation</a>"
 )
 
 HOW_IT_WORKS_TEXT = (
