@@ -274,12 +274,13 @@ function closePayment() {
     tg.MainButton.onClick(proceedToPayment);
 }
 
-function copyCardNumber() {
-    const cardNum = document.getElementById('card-number').innerText;
-    navigator.clipboard.writeText(cardNum).then(() => {
-        const feedback = document.getElementById('copy-feedback');
-        feedback.style.opacity = '1';
-        setTimeout(() => feedback.style.opacity = '0', 2000);
+function copyToClipboard(text, feedbackId) {
+    navigator.clipboard.writeText(text).then(() => {
+        const feedback = document.getElementById(feedbackId);
+        if (feedback) {
+            feedback.style.opacity = '1';
+            setTimeout(() => feedback.style.opacity = '0', 2000);
+        }
         if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     });
 }
