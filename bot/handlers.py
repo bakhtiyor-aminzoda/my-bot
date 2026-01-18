@@ -428,7 +428,13 @@ async def ai_chat_handler(message: types.Message):
     response = await get_ai_response(message.from_user.id, message.text)
     
     from bot.keyboards import ai_response_kb
-    await message.answer(response, parse_mode="Markdown", reply_markup=ai_response_kb())
+    from aiogram.exceptions import TelegramBadRequest
+
+    try:
+        await message.answer(response, parse_mode="Markdown", reply_markup=ai_response_kb())
+    except TelegramBadRequest:
+        # Fallback: If Markdown parsing fails (e.g. unclosed entities), send as plain text
+        await message.answer(response, parse_mode=None, reply_markup=ai_response_kb())
 
 # --- Post-Submit & Misc Handlers ---
 
