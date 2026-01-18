@@ -248,8 +248,7 @@ async def show_case_detail(callback: types.CallbackQuery):
     )
     await callback.answer()
 
-from bot.keyboards import main_menu_kb, services_kb, service_detail_kb, post_submit_kb, budget_kb
-# ... (imports)
+
 
 async def _start_fsm(message: types.Message, state: FSMContext, context: str = None):
     """
