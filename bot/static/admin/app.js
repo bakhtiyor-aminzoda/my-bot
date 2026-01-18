@@ -362,11 +362,19 @@ async function sendNegotiation() {
             renderReadMode(currentOrder);
             document.getElementById('modal-actions').style.display = 'grid';
         } else {
-            const err = await response.json();
-            alert("Ошибка: " + (err.error || "Неизвестная ошибка"));
+            // Try to parse JSON, fallback to text
+            let errorMsg = "Неизвестная ошибка";
+            try {
+                const err = await response.json();
+                errorMsg = err.error || JSON.stringify(err);
+            } catch (e) {
+                errorMsg = await response.text();
+            }
+            alert(`Ошибка сервера (${response.status}): ${errorMsg}`);
         }
     } catch (e) {
-        alert("Ошибка сети");
+        console.error(e);
+        alert("Ошибка сети или скрипта: " + e.message);
     }
 }
 
