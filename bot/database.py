@@ -51,10 +51,24 @@ class Message(Base):
 # --- Functions ---
 
 async def init_db():
-    """Initializes the database (creates tables)."""
+    """Initializes the database (creates tables) and performs auto-migrations."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("✅ Database tables created/verified.")
+    
+    # Auto-migration: Add admin_comment if missing
+    # We use a separate transaction to avoid rolling back create_all if this fails (e.g. column exists)
+    try:
+        async with engine.begin() as conn:
+            # Postgres supports IF NOT EXISTS for columns, but SQLite might not.
+            # Cheapest way: Try to select the column. If fails, add it.
+            # Or just Try ADD COLUMN and catch error.
+            await conn.execute(text("ALTER TABLE orders ADD COLUMN admin_comment TEXT;"))
+            logger.info("🔄 Migration: Added 'admin_comment' column.")
+    except Exception as e:
+        # Expected if column already exists
+        logger.info(f"ℹ️ Migration note: {e}")
+    
+    logger.info("✅ Database initialized.")
 
 async def add_user(user_id: int, username: str, full_name: str):
     """Adds a new user if they don't exist."""
