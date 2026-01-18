@@ -362,13 +362,15 @@ async function sendNegotiation() {
             renderReadMode(currentOrder);
             document.getElementById('modal-actions').style.display = 'grid';
         } else {
-            // Try to parse JSON, fallback to text
+            // Read raw text first to avoid "Body is disturbed"
+            const rawText = await response.text();
             let errorMsg = "Неизвестная ошибка";
             try {
-                const err = await response.json();
+                const err = JSON.parse(rawText);
                 errorMsg = err.error || JSON.stringify(err);
             } catch (e) {
-                errorMsg = await response.text();
+                // If not JSON, use the raw text (truncated if too long)
+                errorMsg = rawText.substring(0, 200);
             }
             alert(`Ошибка сервера (${response.status}): ${errorMsg}`);
         }
