@@ -1,7 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Products Data (Mock)
+// Ensure colors match theme immediately
+tg.setHeaderColor("secondary_bg_color");
+tg.setBackgroundColor("secondary_bg_color");
+
 const products = [
     { id: 1, title: 'Telegram Магазин', price: 2500, icon: '🛍', category: 'bots', desc: 'Каталог, корзина, оплата внутри Telegram.' },
     { id: 2, title: 'CRM Система', price: 4000, icon: '📊', category: 'crm', desc: 'Управление заявками и аналитика для бизнеса.' },
@@ -21,7 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const user = tg.initDataUnsafe.user;
         if (user.photo_url) document.getElementById('user-avatar').src = user.photo_url;
-        // Autofill name if available (not contact, sadly)
+    }
+
+    // MainButton Setup
+    tg.MainButton.textColor = "#FFFFFF";
+    tg.MainButton.color = "#007AFF"; // Or use theme params if needed
+    if (tg.themeParams.button_color) {
+        tg.MainButton.color = tg.themeParams.button_color;
+        tg.MainButton.textColor = tg.themeParams.button_text_color;
     }
 });
 
@@ -60,20 +70,26 @@ function filter(cat) {
 function addToCart(id) {
     const product = products.find(p => p.id === id);
     cart.push(product);
-    updateCartIcon();
+    updateCartUI();
 
-    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 }
 
-function updateCartIcon() {
-    const count = cart.length;
-    document.getElementById('cart-count').innerText = count;
+function updateCartUI() {
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-    const btn = document.getElementById('cart-btn');
-    if (count > 0) {
-        btn.style.transform = 'scale(1)';
+    if (cart.length > 0) {
+        tg.MainButton.setText(`Оформить заказ: ${total} TJS`);
+        if (!tg.MainButton.isVisible) {
+            tg.MainButton.show();
+        }
+        // Bind MainButton action to opening checkout
+        tg.MainButton.onClick(openCheckout); // Note: This adds listener. We need to be careful not to add multiple.
+        tg.MainButton.offClick(submitOrder); // Ensure it's not bound to submit yet
+        tg.MainButton.offClick(openCheckout); // Remove prev to avoid dupes
+        tg.MainButton.onClick(openCheckout);
     } else {
-        btn.style.transform = 'scale(0)';
+        tg.MainButton.hide();
     }
 }
 
@@ -94,31 +110,48 @@ function openCheckout() {
             <span class="cart-item-title">${item.title}</span>
             <span class="cart-item-price">${item.price} TJS</span>
         `;
+
+        // Allow removing intent? For simplicity, keeping it add-only for now, can add delete btn later.
+
         list.appendChild(div);
         total += item.price;
     });
 
     document.getElementById('cart-total').innerText = `${total} TJS`;
     modal.classList.add('active');
+
+    // Switch MainButton to "Pay"
+    tg.MainButton.setText(`Оплатить ${total} TJS`);
+    tg.MainButton.offClick(openCheckout);
+    tg.MainButton.onClick(submitOrder);
 }
 
 function closeCheckout() {
     document.getElementById('checkout-modal').classList.remove('active');
+
+    // Revert MainButton to "View Cart" mode
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    tg.MainButton.setText(`Оформить заказ: ${total} TJS`);
+    tg.MainButton.offClick(submitOrder);
+    tg.MainButton.onClick(openCheckout);
 }
 
 // Submit Order
 async function submitOrder() {
-    const btn = document.querySelector('.btn-primary');
     const contact = document.getElementById('order-contact').value;
     const comment = document.getElementById('order-comment').value;
 
-    if (!contact) {
-        alert("Пожалуйста, укажите ваш контакт");
+    if (!contact || contact.length < 5) {
+        tg.showPopup({
+            title: "Ошибка",
+            message: "Пожалуйста, укажите корректный контакт для связи.",
+            buttons: [{ type: "ok" }]
+        });
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
         return;
     }
 
-    btn.innerText = "Оформляем...";
-    btn.disabled = true;
+    tg.MainButton.showProgress();
 
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     const user = tg.initDataUnsafe.user || { id: 0, first_name: "Guest" };
@@ -141,18 +174,17 @@ async function submitOrder() {
 
         if (response.ok) {
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert("✅ Заказ успешно оформлен!");
-            cart = [];
-            updateCartIcon();
-            closeCheckout();
-            tg.close(); // Close the Mini App
+            tg.MainButton.hideProgress();
+            tg.close();
         } else {
-            alert("Ошибка оформления заказа.");
+            throw new Error("Server Error");
         }
     } catch (e) {
-        alert("Ошибка сети.");
-    } finally {
-        btn.innerText = "Оформить заказ";
-        btn.disabled = false;
+        tg.MainButton.hideProgress();
+        tg.showPopup({
+            title: "Ошибка",
+            message: "Не удалось оформить заказ. Проверьте интернет.",
+            buttons: [{ type: "ok" }]
+        });
     }
 }
