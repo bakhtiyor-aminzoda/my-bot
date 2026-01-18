@@ -288,9 +288,9 @@ async def nav_about(callback: types.CallbackQuery):
     
     if callback.message.photo:
         await callback.message.delete()
-        await callback.message.answer(text, reply_markup=kb, parse_mode="Markdown")
+        await callback.message.answer(text, reply_markup=kb, parse_mode="HTML")
     else:
-        await callback.message.edit_text(text, reply_markup=kb, parse_mode="Markdown")
+        await callback.message.edit_text(text, reply_markup=kb, parse_mode="HTML")
     await callback.answer()
 
 @router.callback_query(F.data == "nav_back_main")
