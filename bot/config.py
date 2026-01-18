@@ -26,5 +26,8 @@ SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 # AI Config
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+# Webhook Config
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+
 if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
     print("WARNING: BOT_TOKEN is not set in config.py or .env")
