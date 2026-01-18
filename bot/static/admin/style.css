@@ -224,12 +224,23 @@ h2 {
     align-items: center;
     box-shadow: var(--shadow-sm);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s;
+    /* Added background transition */
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+    /* Allow vertical scroll, block horizontal for JS */
+    user-select: none;
 }
 
-.booking-item:active {
-    transform: scale(0.98);
+/* Swipe Indicator Backgrounds */
+.booking-item.swiping-right {
+    background: linear-gradient(to right, rgba(52, 199, 89, 0.2), var(--card-bg) 30%);
+}
+
+.booking-item.swiping-left {
+    background: linear-gradient(to left, rgba(255, 59, 48, 0.2), var(--card-bg) 30%);
 }
 
 .booking-info h4 {

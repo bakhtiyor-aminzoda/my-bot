@@ -170,10 +170,76 @@ async function fetchBookings(query = null) {
                 <div class="status ${booking.status}">${translateStatus(booking.status)}</div>
             `;
             container.appendChild(div);
+            // Attach Swipe Logic
+            addSwipeListeners(div, booking.id, booking.status);
         });
     } catch (e) {
         console.error(e);
     }
+}
+
+// Swipe Logic
+function addSwipeListeners(element, id, currentStatus) {
+    let startX = 0;
+    let currentTranslate = 0;
+    let isDragging = false;
+    const threshold = 100; // px to trigger action
+
+    element.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+        element.style.transition = 'none'; // Remove transition for instant drag
+    }, { passive: true });
+
+    element.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const currentX = e.touches[0].clientX;
+        const diff = currentX - startX;
+
+        // Limit dragging only if it makes sense for status
+        if (currentStatus === 'new' || currentStatus === 'in_progress') {
+            // Allow drag
+        } else {
+            return; // Don't swipe completed/cancelled
+        }
+
+        currentTranslate = diff;
+        element.style.transform = `translateX(${diff}px)`;
+
+        // Visual Feedback
+        if (diff > 0) { // Right (Complete/In Progress)
+            element.classList.add('swiping-right');
+            element.classList.remove('swiping-left');
+        } else { // Left (Cancel)
+            element.classList.add('swiping-left');
+            element.classList.remove('swiping-right');
+        }
+    }, { passive: true });
+
+    element.addEventListener('touchend', () => {
+        isDragging = false;
+        element.style.transition = 'transform 0.3s ease, background 0.3s';
+        element.classList.remove('swiping-right', 'swiping-left');
+
+        if (currentTranslate > threshold) {
+            // Swipe Right Action
+            element.style.transform = `translateX(100vw)`; // Fly out
+            setTimeout(() => {
+                if (currentStatus === 'new') updateStatus(id, 'in_progress');
+                else if (currentStatus === 'in_progress') updateStatus(id, 'completed');
+            }, 200);
+        } else if (currentTranslate < -threshold) {
+            // Swipe Left Action
+            element.style.transform = `translateX(-100vw)`; // Fly out
+            setTimeout(() => {
+                updateStatus(id, 'cancelled');
+            }, 200);
+        } else {
+            // Reset
+            element.style.transform = 'translateX(0)';
+        }
+        currentTranslate = 0;
+    });
 }
 
 // --- Search & View All Logic ---
