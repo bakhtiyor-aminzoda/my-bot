@@ -250,6 +250,13 @@ async def show_case_detail(callback: types.CallbackQuery):
 
 
 
+@router.callback_query(F.data == "new_application")
+async def start_application_direct(callback: types.CallbackQuery, state: FSMContext):
+    # Set default context for generic application
+    await state.update_data(service_context="Общая заявка")
+    await _start_fsm(callback.message, state)
+    await callback.answer()
+
 async def _start_fsm(message: types.Message, state: FSMContext, context: str = None):
     """
     Helper to start the FSM flow.
