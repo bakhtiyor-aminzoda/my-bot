@@ -198,22 +198,62 @@ function closeCheckout() {
 }
 
 // Submit Order
-async function submitOrder() {
+// Submit Logic Split
+function proceedToPayment() {
     const contact = document.getElementById('order-contact').value;
-    const comment = document.getElementById('order-comment').value;
 
+    // Validate Contact first
     if (!contact || contact.length < 5) {
         tg.showPopup({
             title: "Контакт обязателен",
-            message: "Пожалуйста, укажите телефон или @username для связи.",
+            message: "Пожалуйста, укажите телефон или @username, чтобы мы могли связаться с вами.",
             buttons: [{ type: "ok" }]
         });
         if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
         return;
     }
 
+    const total = Object.values(cart).reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+
+    // Populate Payment Modal
+    document.getElementById('payment-amount').innerText = `${total} TJS`;
+
+    // Show Modal
+    document.getElementById('payment-modal').classList.add('active');
+
+    // Update MainButton to "I Paid"
+    tg.MainButton.setText(`✅ Я оплатил ${total} TJS`);
+    tg.MainButton.offClick(proceedToPayment); // Remove old listener
+    tg.MainButton.offClick(finalizeOrder); // Dedupe
+    tg.MainButton.onClick(finalizeOrder);
+}
+
+function closePayment() {
+    document.getElementById('payment-modal').classList.remove('active');
+
+    // Revert MainButton to "Checkout" logic
+    const total = Object.values(cart).reduce((sum, item) => sum + (item.product.price * item.qty), 0);
+    tg.MainButton.setText(`Оплатить ${total} TJS`);
+    tg.MainButton.offClick(finalizeOrder);
+    tg.MainButton.onClick(proceedToPayment);
+}
+
+function copyCardNumber() {
+    const cardNum = document.getElementById('card-number').innerText;
+    navigator.clipboard.writeText(cardNum).then(() => {
+        const feedback = document.getElementById('copy-feedback');
+        feedback.style.opacity = '1';
+        setTimeout(() => feedback.style.opacity = '0', 2000);
+        if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    });
+}
+
+// Final Submit
+async function finalizeOrder() {
     tg.MainButton.showProgress();
 
+    const contact = document.getElementById('order-contact').value;
+    const comment = document.getElementById('order-comment').value;
     const cartItems = Object.values(cart);
     const total = cartItems.reduce((sum, item) => sum + (item.product.price * item.qty), 0);
     const user = tg.initDataUnsafe.user || { id: 0, first_name: "Guest" };
@@ -222,9 +262,9 @@ async function submitOrder() {
         user_id: user.id,
         name: user.first_name + (user.last_name ? " " + user.last_name : ""),
         contact_info: contact,
-        items: cartItems.map(i => ({ ...i.product, quantity: i.qty })), // Flatten for backend
+        items: cartItems.map(i => ({ ...i.product, quantity: i.qty })),
         total: total,
-        comment: comment
+        comment: comment + " [PAID VIA QR]"
     };
 
     try {
