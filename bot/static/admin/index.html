@@ -85,6 +85,16 @@
                         placeholder="Поиск по имени или телефону...">
                 </div>
 
+
+                <!-- Filters -->
+                <div class="filter-scroll">
+                    <div class="filter-pill active" onclick="setFilter('all', this)">Все</div>
+                    <div class="filter-pill" onclick="setFilter('new', this)">Новые</div>
+                    <div class="filter-pill" onclick="setFilter('in_progress', this)">В работе</div>
+                    <div class="filter-pill" onclick="setFilter('completed', this)">Готовые</div>
+                    <div class="filter-pill" onclick="setFilter('cancelled', this)">Отмена</div>
+                </div>
+
                 <section class="bookings-list" id="bookings-container">
                     <!-- Items injected by JS -->
                     <div class="loading-spinner">Загрузка...</div>

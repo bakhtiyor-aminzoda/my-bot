@@ -170,76 +170,66 @@ async function fetchBookings(query = null) {
                 <div class="status ${booking.status}">${translateStatus(booking.status)}</div>
             `;
             container.appendChild(div);
-            // Attach Swipe Logic
-            addSwipeListeners(div, booking.id, booking.status);
         });
     } catch (e) {
         console.error(e);
     }
 }
 
-// Swipe Logic
-function addSwipeListeners(element, id, currentStatus) {
-    let startX = 0;
-    let currentTranslate = 0;
-    let isDragging = false;
-    const threshold = 100; // px to trigger action
+// Global Filter State
+let currentFilter = 'all';
 
-    element.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        isDragging = true;
-        element.style.transition = 'none'; // Remove transition for instant drag
-    }, { passive: true });
+function setFilter(status, element) {
+    // UI Update
+    document.querySelectorAll('.filter-pill').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
 
-    element.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        const currentX = e.touches[0].clientX;
-        const diff = currentX - startX;
+    // Logic
+    currentFilter = status;
+    fetchBookings(); // Re-fetch/Re-render with filter
+}
 
-        // Limit dragging only if it makes sense for status
-        if (currentStatus === 'new' || currentStatus === 'in_progress') {
-            // Allow drag
-        } else {
-            return; // Don't swipe completed/cancelled
+// Modify renderBookings to filter
+async function fetchBookings() {
+    try {
+        const response = await fetch('/api/bookings');
+        const bookings = await response.json();
+
+        const container = document.getElementById('bookings-container');
+        container.innerHTML = '';
+
+        // Apply Filters
+        const filtered = bookings.filter(b => {
+            if (currentFilter === 'all') return true;
+            return b.status === currentFilter;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:20px;">Нет заявок с таким статусом</div>';
+            return;
         }
 
-        currentTranslate = diff;
-        element.style.transform = `translateX(${diff}px)`;
+        filtered.forEach(booking => {
+            const div = document.createElement('div');
+            div.className = 'booking-item';
+            div.onclick = () => showBookingDetails(booking);
 
-        // Visual Feedback
-        if (diff > 0) { // Right (Complete/In Progress)
-            element.classList.add('swiping-right');
-            element.classList.remove('swiping-left');
-        } else { // Left (Cancel)
-            element.classList.add('swiping-left');
-            element.classList.remove('swiping-right');
-        }
-    }, { passive: true });
+            // Format nice date
+            const date = new Date(booking.created_at || new Date());
+            const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 
-    element.addEventListener('touchend', () => {
-        isDragging = false;
-        element.style.transition = 'transform 0.3s ease, background 0.3s';
-        element.classList.remove('swiping-right', 'swiping-left');
-
-        if (currentTranslate > threshold) {
-            // Swipe Right Action
-            element.style.transform = `translateX(100vw)`; // Fly out
-            setTimeout(() => {
-                if (currentStatus === 'new') updateStatus(id, 'in_progress');
-                else if (currentStatus === 'in_progress') updateStatus(id, 'completed');
-            }, 200);
-        } else if (currentTranslate < -threshold) {
-            // Swipe Left Action
-            element.style.transform = `translateX(-100vw)`; // Fly out
-            setTimeout(() => {
-                updateStatus(id, 'cancelled');
-            }, 200);
-        } else {
-            // Reset
-            element.style.transform = 'translateX(0)';
-        }
-        currentTranslate = 0;
-    });
+            div.innerHTML = `
+                <div class="booking-info">
+                    <h4>${booking.name || 'Клиент'}</h4>
+                    <p>${booking.service_context || 'Заказ'} • ${dateStr}</p>
+                </div>
+                <div class="status ${booking.status}">${translateStatus(booking.status)}</div>
+            `;
+            container.appendChild(div);
+        });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 // --- Search & View All Logic ---
