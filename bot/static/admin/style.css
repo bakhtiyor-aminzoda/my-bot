@@ -615,47 +615,82 @@ body.dark-mode .modal-card {
     border: 1px solid #38383a;
 }
 
-body.dark-mode .close-btn {
-    background: #2c2c2e;
-    color: #ffffff;
+
+/* Scroll Fixes (Stop Pull-to-Close) */
+html,
+body {
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    /* Ensure body takes full height */
 }
 
-body.dark-mode .detail-row {
-    border-bottom: 1px solid #38383a;
+/* Sticky Filter Bar */
+.filter-scroll {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 16px 0;
+    margin: 0 -20px 20px -20px;
+    /* Bleed to edges */
+    padding-left: 20px;
+    padding-right: 20px;
+
+    /* Decoration */
+    background: rgba(247, 249, 252, 0.85);
+    /* Light Mode Glass */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    /* Scrollbar Hiding */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-body.dark-mode .form-input,
-body.dark-mode .icon-input-trigger,
-body.dark-mode .search-input {
-    background: #2c2c2e;
-    border-color: #38383a;
-    color: #ffffff;
+body.dark-mode .filter-scroll {
+    background: rgba(0, 0, 0, 0.85);
+    /* Dark Mode Glass */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-body.dark-mode .search-input:focus {
-    background: #1c1c1e;
+.filter-scroll::-webkit-scrollbar {
+    display: none;
 }
 
-body.dark-mode .detail-label {
-    color: #8e8e93;
+.filter-pill {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
-body.dark-mode .prod-title {
-    color: #ffffff;
+.filter-pill:active {
+    transform: scale(0.95);
 }
 
-/* Global Dark Mode Fixes */
-body.dark-mode .stat-card,
-body.dark-mode .chart-card,
-body.dark-mode .booking-item,
-body.dark-mode .product-item {
-    border-color: rgba(255, 255, 255, 0.1);
+.filter-pill.active {
+    background: var(--text-primary);
+    color: var(--bg-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-body.dark-mode .bottom-nav {
-    border-top-color: rgba(255, 255, 255, 0.1);
+body.dark-mode .filter-pill {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: transparent;
 }
 
-body.dark-mode .avatar img {
-    border-color: #1c1c1e;
+body.dark-mode .filter-pill.active {
+    background: #fff;
+    color: #000;
 }
