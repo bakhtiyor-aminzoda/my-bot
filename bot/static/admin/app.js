@@ -221,7 +221,7 @@ async function fetchBookings() {
         filtered.forEach(booking => {
             const div = document.createElement('div');
             div.className = 'booking-item';
-            div.onclick = () => showBookingDetails(booking);
+            div.onclick = () => showDetails(booking.id);
 
             // Format nice date
             const date = new Date(booking.created_at || new Date());
