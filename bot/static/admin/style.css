@@ -692,7 +692,120 @@ body.dark-mode .filter-pill {
     border-color: transparent;
 }
 
-body.dark-mode .filter-pill.active {
+
+/* Premium Form Styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.premium-input {
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Very subtle border */
+    border-radius: 16px;
+    font-size: 17px;
+    /* iOS standard */
+    font-family: inherit;
+    color: var(--text-primary);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.premium-input:focus {
+    outline: none;
     background: #fff;
-    color: #000;
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.premium-input:disabled {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-secondary);
+    border: none;
+    box-shadow: none;
+}
+
+/* Input Group (for TJS suffix) */
+.input-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.input-suffix {
+    position: absolute;
+    right: 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* Negotiation Card */
+.negotiation-card {
+    background: linear-gradient(135deg, rgba(255, 149, 0, 0.05), rgba(255, 149, 0, 0.1));
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255, 149, 0, 0.15);
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.negotiation-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: #FF9500;
+    /* Orange */
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.negotiation-hint {
+    font-size: 13px;
+    color: #9c6800;
+    margin-bottom: 16px;
+    line-height: 1.4;
+    opacity: 0.8;
+}
+
+/* Dark Mode Overrides */
+body.dark-mode .premium-input {
+    background: rgba(255, 255, 255, 0.08);
+    /* Dark glass */
+    border-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+body.dark-mode .premium-input:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent-color);
+}
+
+body.dark-mode .premium-input:disabled {
+    background: rgba(255, 255, 255, 0.03);
+    color: #666;
+}
+
+body.dark-mode .negotiation-card {
+    background: rgba(255, 149, 0, 0.08);
+    /* Darker orange tint */
+    border-color: rgba(255, 149, 0, 0.2);
+}
+
+body.dark-mode .negotiation-hint {
+    color: #ffb340;
 }

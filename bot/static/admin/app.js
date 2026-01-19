@@ -385,49 +385,55 @@ function renderReadMode(order) {
 
 function enableEditMode() {
     const order = currentOrder;
-    // Strip non-numeric chars for editing if needed, or just keep as is but remove TJS suffix
     const numericBudget = (order.budget || '').replace(' TJS', '').trim();
 
     const formHtml = `
         <div class="edit-form">
-            <h4 style="margin-bottom:15px; color:#007AFF;">📝 Редактирование заказа</h4>
-            
-            <label class="detail-label">Контакты (только чтение)</label>
-            <input type="text" id="edit-contact" value="${order.contact_info || ''}" class="form-input" disabled style="background:#f0f0f5; color:#666;">
-            
-            <label class="detail-label">Описание (только чтение)</label>
-            <textarea id="edit-desc" rows="3" class="form-input" disabled style="background:#f0f0f5; color:#666;">${order.task_description || ''}</textarea>
-            
-            <label class="detail-label">Бюджет (TJS)</label>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <input type="number" id="edit-budget" value="${numericBudget}" class="form-input" style="margin-bottom:12px; font-weight:bold; font-size:16px;">
-                <span style="font-weight:600; margin-bottom:12px;">TJS</span>
+            <!-- Order Details Section -->
+            <div class="form-group">
+                <label class="form-label">Бюджет (TJS)</label>
+                <div class="input-group">
+                    <input type="number" id="edit-budget" value="${numericBudget}" class="premium-input" placeholder="0">
+                    <span class="input-suffix">TJS</span>
+                </div>
             </div>
-            
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e1e1e1;">
-            
-            <h4 style="margin-bottom:10px; color:#FF9500;">🤝 Переговоры с клиентом</h4>
-            <div style="background:#FFF8E8; padding:12px; border-radius:10px; margin-bottom:15px;">
-                <p style="font-size:13px; color:#D98200; line-height:1.4;">
-                    Измените <b>Бюджет</b> выше и напишите комментарий ниже. Клиент получит кнопку "Принять" или "Отказать".
+
+            <div class="form-group">
+                <label class="form-label">Описание задачи</label>
+                <textarea id="edit-desc" rows="3" class="premium-input" placeholder="Что нужно сделать?">${order.task_description || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Контакты</label>
+                <input type="text" id="edit-contact" value="${order.contact_info || ''}" class="premium-input">
+            </div>
+
+            <!-- Negotiation Section -->
+            <div class="negotiation-card">
+                <div class="negotiation-header">
+                    <span>🤝 Переговоры</span>
+                </div>
+                <p class="negotiation-hint">
+                    Отправьте клиенту предложение с ценой. <br>Он получит кнопки "Принять" / "Отказать".
                 </p>
+                
+                <textarea id="edit-admin-comment" rows="2" class="premium-input" 
+                    placeholder="Комментарий (например: 'Сделаем за 3 дня')" 
+                    style="margin-bottom: 12px;">${order.admin_comment || ''}</textarea>
+                
+                <button class="btn btn-primary" style="width:100%; background: #FF9500; box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);" onclick="sendNegotiation()">
+                    📤 Отправить предложение
+                </button>
             </div>
             
-            <label class="detail-label">Комментарий для клиента</label>
-            <textarea id="edit-admin-comment" rows="3" class="form-input" 
-                placeholder="Здравствуйте! Мы изучили задачу. Готовы выполнить за..." 
-                style="border-color:#FF9500;">${order.admin_comment || ''}</textarea>
-        
-            <button class="btn btn-warning" style="width:100%; padding:14px; margin-top:10px; font-weight:600;" onclick="sendNegotiation()">
-                📤 Отправить предложение клиенту
-            </button>
-            
-            <div style="margin-top:15px; display:flex; gap:10px;">
-                <button class="btn btn-secondary" style="flex:1;" onclick="saveOrderDetails()">💾 Сохранить</button>
-                <button class="btn btn-sm" style="flex:1; background:white; border:1px solid #ddd;" onclick="renderReadMode(currentOrder)">Отмена</button>
+            <!-- Actions -->
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button class="btn btn-secondary" style="flex:1" onclick="saveOrderDetails()">💾 Сохранить</button>
+                <button class="btn" style="flex:1; background:rgba(0,0,0,0.05); color:var(--text-secondary);" onclick="renderReadMode(currentOrder)">Отмена</button>
             </div>
         </div>
     `;
+
     document.getElementById('read-view').style.display = 'none';
     const editView = document.getElementById('edit-view');
     editView.innerHTML = formHtml;
@@ -435,7 +441,13 @@ function enableEditMode() {
 
     // Hide main actions while editing
     document.getElementById('modal-actions').style.display = 'none';
+
+    // Auto-focus budget if empty
+    if (!numericBudget) {
+        setTimeout(() => document.getElementById('edit-budget').focus(), 100);
+    }
 }
+
 
 async function sendNegotiation() {
     const budgetVal = document.getElementById('edit-budget').value;
