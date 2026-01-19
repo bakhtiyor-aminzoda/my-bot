@@ -32,11 +32,45 @@
             <p>Выберите решение, которое ускорит ваш бизнес.</p>
         </div>
 
-        <!-- Filter Tabs -->
+        <!-- Tabs -->
         <div class="tabs">
             <button class="tab active" onclick="filter('all')">Все</button>
             <button class="tab" onclick="filter('bots')">Боты</button>
             <button class="tab" onclick="filter('crm')">CRM</button>
+        </div>
+
+        <!-- Referral Card (Hidden by default) -->
+        <div id="referral-card" class="banner"
+            style="display: none; background: linear-gradient(135deg, #FF9500, #FFCC00); margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 18px; color: white;">Пригласи друга 🤝</h2>
+                    <p id="referral-stats" style="font-size: 13px; color: rgba(255,255,255,0.9);">
+                        Приглашено: 0
+                    </p>
+                </div>
+                <button onclick="copyReferralLink()" style="
+                    background: rgba(255,255,255,0.2); 
+                    border: 1px solid rgba(255,255,255,0.4); 
+                    color: white; 
+                    padding: 8px 12px; 
+                    border-radius: 12px; 
+                    font-size: 13px; 
+                    font-weight: 600;
+                    backdrop-filter: blur(4px);
+                    cursor: pointer;
+                ">
+                    Скопировать
+                </button>
+            </div>
+            <div id="ref-copy-feedback" style="
+                font-size: 11px; 
+                color: white; 
+                margin-top: 4px; 
+                text-align: right; 
+                opacity: 0; 
+                transition: opacity 0.3s;
+            ">Ссылка скопирована!</div>
         </div>
 
         <!-- Product Grid -->

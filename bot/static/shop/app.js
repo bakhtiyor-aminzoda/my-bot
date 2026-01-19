@@ -25,12 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (user.photo_url) {
             avatarEl.src = user.photo_url;
             avatarEl.onerror = () => {
-                // Fallback if TG photo is private/broken
                 avatarEl.src = `https://ui-avatars.com/api/?name=${user.first_name}&background=007AFF&color=fff`;
             };
         } else {
             avatarEl.src = `https://ui-avatars.com/api/?name=${user.first_name}&background=007AFF&color=fff`;
         }
+
+        // Load Referral Stats
+        loadReferralStats(user.id);
     }
 
     // MainButton Setup
@@ -41,6 +43,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         tg.MainButton.textColor = tg.themeParams.button_text_color;
     }
 });
+
+async function loadReferralStats(userId) {
+    try {
+        const res = await fetch(`/api/client/referrals?user_id=${userId}`);
+        const data = await res.json();
+
+        if (data && typeof data.count === 'number') {
+            document.getElementById('referral-stats').innerText = `Приглашено: ${data.count}`;
+            document.getElementById('referral-card').style.display = 'block';
+        }
+    } catch (e) {
+        console.error("Referral stats fail:", e);
+    }
+}
+
+function copyReferralLink() {
+    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) return;
+
+    // Construct link: https://t.me/BOT_USERNAME?start=ref_USERID
+    // Since we might not know bot username in JS easily without config, 
+    // we can use a generic logic or hardcode if known.
+    // Ideally, we pass bot_username from API, but for now let's hope user knows context or we assume "AminiAutomationBot"
+    // Better: Use `tg.initDataUnsafe.user.id` to form query.
+    // Just use a placeholder hostname if unknown, or ask user to fix.
+    // Hardcoded for demo: t.me/Amini_Demo_Bot
+
+    // NOTE: You must replace 'ProgradeBot' with your actual bot username!
+    const botUsername = "ProgradeBot";
+    const link = `https://t.me/${botUsername}?start=ref_${tg.initDataUnsafe.user.id}`;
+
+    navigator.clipboard.writeText(link).then(() => {
+        const feedback = document.getElementById('ref-copy-feedback');
+        if (feedback) {
+            feedback.style.opacity = '1';
+            setTimeout(() => feedback.style.opacity = '0', 2000);
+        }
+        if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    });
+}
 
 function renderProducts(filter) {
     const container = document.getElementById('product-grid');
