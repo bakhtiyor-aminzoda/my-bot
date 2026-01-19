@@ -1,5 +1,9 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
+// Disable swipe-to-close
+if (tg.isVerticalSwipesEnabled !== undefined) {
+    tg.isVerticalSwipesEnabled = false;
+}
 
 // Ensure colors match theme immediately
 tg.setHeaderColor("secondary_bg_color");
