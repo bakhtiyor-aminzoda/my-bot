@@ -59,28 +59,62 @@ async function loadReferralStats(userId) {
 }
 
 function copyReferralLink() {
-    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) return;
+    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+        tg.showAlert("Ошибка: Не удалось определить пользователя.");
+        return;
+    }
 
-    // Construct link: https://t.me/BOT_USERNAME?start=ref_USERID
-    // Since we might not know bot username in JS easily without config, 
-    // we can use a generic logic or hardcode if known.
-    // Ideally, we pass bot_username from API, but for now let's hope user knows context or we assume "AminiAutomationBot"
-    // Better: Use `tg.initDataUnsafe.user.id` to form query.
-    // Just use a placeholder hostname if unknown, or ask user to fix.
-    // Hardcoded for demo: t.me/Amini_Demo_Bot
-
-    // NOTE: You must replace 'ProgradeBot' with your actual bot username!
+    // NOTE: Replace with your actual bot username if different.
+    // If we are developing locally, user needs to manually adjust this.
     const botUsername = "ProgradeBot";
     const link = `https://t.me/${botUsername}?start=ref_${tg.initDataUnsafe.user.id}`;
 
-    navigator.clipboard.writeText(link).then(() => {
-        const feedback = document.getElementById('ref-copy-feedback');
-        if (feedback) {
-            feedback.style.opacity = '1';
-            setTimeout(() => feedback.style.opacity = '0', 2000);
+    // Fallback copy mechanism (supports HTTP and older browsers)
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(link).then(showCopyFeedback).catch(err => {
+            console.error('Async: Could not copy text: ', err);
+            fallbackCopyTextToClipboard(link);
+        });
+    } else {
+        fallbackCopyTextToClipboard(link);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // Ensure it's not visible
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopyFeedback();
+        } else {
+            tg.showAlert("Не удалось скопировать ссылку. Попробуйте вручную: " + text);
         }
-        if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-    });
+    } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+        tg.showAlert("Ошибка копирования: " + err);
+    }
+
+    document.body.removeChild(textArea);
+}
+
+function showCopyFeedback() {
+    const feedback = document.getElementById('ref-copy-feedback');
+    if (feedback) {
+        feedback.style.opacity = '1';
+        setTimeout(() => feedback.style.opacity = '0', 2000);
+    }
+    if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
 }
 
 function renderProducts(filter) {
