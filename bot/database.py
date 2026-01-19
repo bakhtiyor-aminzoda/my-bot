@@ -38,6 +38,8 @@ class User(Base):
     username = Column(String, nullable=True)
     full_name = Column(String, nullable=True)
     language_code = Column(String, default="ru")
+    invited_by = Column(BigInteger, nullable=True) # Referrer ID
+    referral_count = Column(Integer, default=0)    # How many people they invited
     joined_at = Column(DateTime, default=datetime.utcnow)
 
 class Message(Base):
@@ -71,20 +73,44 @@ async def init_db():
             logger.info("🔄 Migration: Added 'language_code' column.")
     except Exception as e:
         logger.info(f"ℹ️ Migration note (users): {e}")
+
+    # Auto-migration: Referral System
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN invited_by BIGINT;"))
+            await conn.execute(text("ALTER TABLE users ADD COLUMN referral_count INTEGER DEFAULT 0;"))
+            logger.info("🔄 Migration: Added Referral columns.")
+    except Exception as e:
+        logger.info(f"ℹ️ Migration note (referrals): {e}")
     
     logger.info("✅ Database initialized.")
 
-async def add_user(user_id: int, username: str, full_name: str):
-    """Adds a new user if they don't exist."""
+async def add_user(user_id: int, username: str, full_name: str, invited_by: int = None):
+    """Adds a new user if they don't exist. Handles referrals."""
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(User).filter_by(id=user_id))
         user = result.scalar_one_or_none()
         
         if not user:
-            new_user = User(id=user_id, username=username, full_name=full_name)
+            new_user = User(
+                id=user_id, 
+                username=username, 
+                full_name=full_name,
+                invited_by=invited_by
+            )
             session.add(new_user)
+            
+            # Increment Referrer Count
+            if invited_by:
+                referrer_res = await session.execute(select(User).filter_by(id=invited_by))
+                referrer = referrer_res.scalar_one_or_none()
+                if referrer:
+                    referrer.referral_count += 1
+            
             await session.commit()
-            logger.info(f"🆕 New user added: {user_id}")
+            logger.info(f"🆕 New user added: {user_id} (Invited by: {invited_by})")
+            return True # Indicates new user created
+        return False # User existed
 
 async def get_user_language(user_id: int):
     """Returns user's language code (default 'ru')."""
@@ -106,6 +132,13 @@ async def set_user_language(user_id: int, lang_code: str):
             new_user = User(id=user_id, language_code=lang_code)
             session.add(new_user)
             await session.commit()
+
+async def get_referral_stats(user_id: int):
+    """Returns number of users invited by this user."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User.referral_count).where(User.id == user_id))
+        count = result.scalar_one_or_none()
+        return count if count else 0
 
 async def get_all_users():
     """Returns a list of all user IDs."""

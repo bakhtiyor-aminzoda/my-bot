@@ -1,7 +1,7 @@
 import os
 import datetime
 from aiogram import Router, F, types
-from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram.filters import Command, CommandStart, StateFilter, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -9,7 +9,7 @@ from bot.states import ApplicationState
 from bot.config import ADMIN_ID, ADMIN_USERNAME, WEBHOOK_URL
 from bot.keyboards import main_menu_kb, cases_kb, case_action_kb, post_submit_kb, budget_kb
 from bot.locales_data import LOCALES
-from bot.database import add_user, get_user_language, set_user_language, add_order
+from bot.database import add_user, get_user_language, set_user_language, add_order, get_referral_stats
 
 router = Router()
 
@@ -142,14 +142,39 @@ async def show_my_orders(callback: types.CallbackQuery):
     await callback.answer()
 
 @router.message(CommandStart())
-async def cmd_start(message: types.Message, state: FSMContext):
+async def cmd_start(message: types.Message, state: FSMContext, command: CommandObject = None):
     """Entry point: Shows Language Selection or Main Menu."""
-    # Save user immediately
-    await add_user(
+    
+    # Process Referral Argument
+    invited_by = None
+    if command and command.args:
+        try:
+            # Format: ref_12345
+            if command.args.startswith("ref_"):
+                referrer_id = int(command.args.split("_")[1])
+                if referrer_id != message.from_user.id: # Prevent self-referral
+                    invited_by = referrer_id
+        except Exception: 
+            pass
+
+    # Save user immediately (with referral info)
+    is_new = await add_user(
         message.from_user.id,
         message.from_user.username,
-        message.from_user.full_name
+        message.from_user.full_name,
+        invited_by=invited_by
     )
+    
+    # Notify Referrer if new user was created
+    if is_new and invited_by:
+        try:
+            await message.bot.send_message(
+                invited_by,
+                f"🎉 <b>По вашей ссылке пришел новый пользователь!</b>\n{message.from_user.full_name}",
+                parse_mode="HTML"
+            )
+        except Exception: pass
+
     await state.clear()
     
     # Show Language Selection
