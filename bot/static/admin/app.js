@@ -229,8 +229,8 @@ async function fetchBookings() {
 
             div.innerHTML = `
                 <div class="booking-info">
-                    <h4>${booking.name || 'Клиент'}</h4>
-                    <p>${booking.service_context || 'Заказ'} • ${dateStr}</p>
+                    <h4>${booking.client || 'Клиент'}</h4>
+                    <p>${booking.service || 'Заказ'} • ${dateStr}</p>
                 </div>
                 <div class="status ${booking.status}">${translateStatus(booking.status)}</div>
             `;
