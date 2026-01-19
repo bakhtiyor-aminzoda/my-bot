@@ -284,6 +284,22 @@ async def create_client_order(request):
         print(f"Web Order Error: {e}")
         return web.json_response({"error": str(e)}, status=500)
 
+async def get_client_referrals(request):
+    """
+    GET /api/client/referrals?user_id=123
+    Returns referral stats for a specific user.
+    """
+    try:
+        user_id = int(request.query.get("user_id"))
+        from bot.database import get_referral_stats
+        count = await get_referral_stats(user_id)
+        return web.json_response({"count": count})
+    except (ValueError, TypeError):
+        return web.json_response({"error": "Invalid user_id"}, status=400)
+    except Exception as e:
+        print(f"Stats Error: {e}")
+        return web.json_response({"count": 0})
+
 async def get_products_list(request):
     """GET /api/products"""
     products = await get_all_products(only_active=True)

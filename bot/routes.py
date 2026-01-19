@@ -3,7 +3,8 @@ from bot.api import (
     get_dashboard_stats, get_bookings_list, health_check, 
     get_order_details, update_order_status, update_order_details, 
     send_broadcast, create_client_order, negotiate_order,
-    get_products_list, create_product, update_product_endpoint, delete_product_endpoint
+    get_products_list, create_product, update_product_endpoint, delete_product_endpoint,
+    get_client_referrals
 )
 
 def setup_routes(app: web.Application):
@@ -19,6 +20,7 @@ def setup_routes(app: web.Application):
     app.router.add_post("/api/orders/{id}/negotiate", negotiate_order)
     app.router.add_post("/api/broadcast", send_broadcast)
     app.router.add_post("/api/client/orders", create_client_order)
+    app.router.add_get("/api/client/referrals", get_client_referrals)
     
     # Product Management
     app.router.add_get("/api/products", get_products_list)
