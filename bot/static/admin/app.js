@@ -1,5 +1,14 @@
 // Initialize Telegram WebApp
 const tg = window.Telegram.WebApp;
+
+// 1. Expand to full height (Reduces swipe-to-close area)
+tg.expand();
+
+// 2. Disable vertical swipe-to-close (Modern Telegram Clients)
+// This locks the app so swiping down DOES NOT close it.
+if (tg.isVerticalSwipesEnabled !== undefined) {
+    tg.isVerticalSwipesEnabled = false;
+}
 tg.expand();
 
 // Globals
