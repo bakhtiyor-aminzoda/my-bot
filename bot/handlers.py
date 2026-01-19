@@ -249,6 +249,21 @@ async def cmd_admin_panel(message: types.Message):
         parse_mode="HTML"
     )
 
+@router.message(Command("seed"))
+async def cmd_seed(message: types.Message):
+    """Admin command: Seed DB with dummy data."""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    await message.answer("🌱 Seeding database... Please wait.", parse_mode="Markdown")
+    
+    from bot.database import seed_dummy_orders
+    try:
+        await seed_dummy_orders(message.from_user.id)
+        await message.answer("✅ **Database Seeded!**\n\nReload the Admin Panel web app to see changes.", parse_mode="Markdown")
+    except Exception as e:
+        await message.answer(f"❌ Error seeding:\n`{str(e)}`", parse_mode="Markdown")
+
 
 @router.callback_query(F.data == "nav_cases")
 async def nav_cases(callback: types.CallbackQuery):

@@ -372,14 +372,59 @@ async def seed_products():
             
     # Default Products
     items = [
-        {"title": 'Telegram Магазин', "price": 2400, "icon": '🛍', "category": 'bots', "desc": 'Каталог, корзина, оплата. (4 дня)'},
-        {"title": 'CRM Система', "price": 4200, "icon": '📊', "category": 'crm', "desc": 'Управление заявками и аналитика. (7 дней)'},
-        {"title": 'Чат-бот Визитка', "price": 1200, "icon": '📇', "category": 'bots', "desc": 'Ответы на вопросы, контакты. (2 дня)'},
-        {"title": 'Запись клиентов', "price": 3000, "icon": '📅', "category": 'bots', "desc": 'Бронирование слотов, календарь. (5 дней)'},
-        {"title": 'AI Ассистент', "price": 4800, "icon": '🤖', "category": 'crm', "desc": 'Умный бот на базе GPT. (8 дней)'},
-        {"title": 'Консультация', "price": 600, "icon": '👨‍💻', "category": 'other', "desc": 'Разбор вашей бизнес-задачи. (1 день)'}
+        {"title": 'Telegram Магазин', "price": 2500, "icon": '🛍', "category": 'bots', "desc": 'Каталог, корзина, оплата внутри Telegram.'},
+        {"title": 'CRM Система', "price": 4000, "icon": '📊', "category": 'crm', "desc": 'Управление заявками и аналитика для бизнеса.'},
+        {"title": 'Чат-бот Визитка', "price": 1000, "icon": '📇', "category": 'bots', "desc": 'Ответы на вопросы, контакты, портфолио.'},
+        {"title": 'Запись клиентов', "price": 3000, "icon": '📅', "category": 'bots', "desc": 'Бронирование слотов, календарь, напоминания.'},
+        {"title": 'AI Ассистент', "price": 5000, "icon": '🤖', "category": 'crm', "desc": 'Умный бот на базе GPT для техподдержки.'},
+        {"title": 'Консультация', "price": 500, "icon": '👨‍💻', "category": 'other', "desc": 'Разбор вашей бизнес-задачи за 1 час.'}
     ]
     
     for item in items:
         await add_product(item)
     logger.info("🌱 Database seeded with default products.")
+
+async def seed_dummy_orders(user_id: int):
+    """Seeds realistic fake orders for the given user (Admin)."""
+    # Orders List
+    orders = [
+        {"name": "Алишер", "contact_info": "+992 900 12 34 56", "service_context": "Чат-бот Визитка", "budget": "1500 TJS", "task_description": "Нужен бот для кафе, меню и контакты.", "status": "new", "days_ago": 0},
+        {"name": "Мадина (Салон)", "contact_info": "@madina_beauty", "service_context": "Запись клиентов", "budget": "3000 TJS", "task_description": "Хочу чтобы клиенты сами записывались на маникюр.", "status": "new", "days_ago": 0},
+        {"name": "Tech House", "contact_info": "+992 93 555 00 00", "service_context": "Telegram Магазин", "budget": "5000 TJS", "task_description": "Магазин электроники. 500 товаров. Нужна синхронизация.", "status": "negotiation_pending", "days_ago": 0},
+        {"name": "Отель 'Памир'", "contact_info": "+992 888 77 77 77", "service_context": "AI Ассистент", "budget": "7000 TJS", "task_description": "Бот отвечающий на вопросы туристов на английском.", "status": "in_progress", "days_ago": 1},
+        {"name": "Фаррух Логистика", "contact_info": "@farrukh_log", "service_context": "CRM Система", "budget": "10000 TJS", "task_description": "Учет грузов в телеграме.", "status": "in_progress", "days_ago": 2},
+        {"name": "Burger King", "contact_info": "Менеджер Азиз", "service_context": "Чат-бот Визитка", "budget": "1200 TJS", "task_description": "Простая визитка с локацией.", "status": "completed", "days_ago": 3},
+        {"name": "Soft Club", "contact_info": "HR Dept", "service_context": "Консультация", "budget": "500 TJS", "task_description": "Консультация по внедрению AI.", "status": "completed", "days_ago": 4},
+        {"name": "VIP Taxi", "contact_info": "+992 900 00 00 01", "service_context": "Запись клиентов", "budget": "3500 TJS", "task_description": "Бот для вызова такси.", "status": "completed", "days_ago": 5},
+        {"name": "Студент", "contact_info": "unknown", "service_context": "Консультация", "budget": "0 TJS", "task_description": "Просто спросить.", "status": "cancelled", "days_ago": 6},
+    ]
+
+    for o in orders:
+        data = {
+            "name": o["name"],
+            "contact_info": o["contact_info"],
+            "business_type": "Seed Data",
+            "budget": o["budget"],
+            "task_description": o["task_description"],
+            "service_context": o["service_context"]
+        }
+        
+        # Add Order
+        order_id = await add_order(user_id, data)
+        
+        # Update Status
+        if o["status"] != "new":
+            await update_order_status(order_id, o["status"])
+            
+        # Backdate Logic (Direct SQL)
+        days = o["days_ago"]
+        if days > 0:
+            backdate = datetime.utcnow() - timedelta(days=days)
+            async with engine.begin() as conn:
+                await conn.execute(
+                    text(f"UPDATE orders SET created_at = :date WHERE id = :id"),
+                    {"date": backdate, "id": order_id}
+                )
+    
+    logger.info(f"🌱 Seeded {len(orders)} orders for user {user_id}")
+
