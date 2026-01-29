@@ -730,8 +730,39 @@
             });
         }
 
+        // --- Smart Refresh State ---
+        let lastOrdersHash = "";
+
+        async function fetchOrders() {
+            // visible check: don't background refresh if user is not on Orders tab
+            if (!document.getElementById('view-orders').classList.contains('active')) return;
+
+            try {
+                const headers = { 'X-Telegram-User': '6066116812' };
+                const res = await fetch('/api/bookings', { headers });
+                const newOrders = await res.json();
+
+                // Smart Diff: Only render if data changed
+                const newHash = JSON.stringify(newOrders);
+                if (newHash !== lastOrdersHash) {
+                    allOrders = newOrders;
+                    lastOrdersHash = newHash;
+                    renderList();
+
+                    // Small indicator that data updated
+                    const indicator = document.getElementById('loading-indicator');
+                    indicator.style.display = 'block';
+                    setTimeout(() => indicator.style.display = 'none', 1000);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Initial Load
         fetchOrders();
-        setInterval(fetchOrders, 10000);
+        // Smart Polling
+        setInterval(fetchOrders, 5000);
 
     </script>
 </body>
