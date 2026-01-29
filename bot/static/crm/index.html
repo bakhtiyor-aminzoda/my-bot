@@ -6,269 +6,283 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Amini CRM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #F5F7FA;
-            --card-bg: #FFFFFF;
-            --text-primary: #1A1F36;
-            --text-secondary: #6B7280;
-            --accent-color: #3B82F6;
-            --accent-hover: #2563EB;
-            --danger-color: #EF4444;
-            --success-color: #10B981;
+            /* Fallback colors (will be overridden by TG Theme) */
+            --tg-theme-bg-color: #F1F5F9;
+            --tg-theme-text-color: #0F172A;
+            --tg-theme-hint-color: #64748B;
+            --tg-theme-button-color: #3B82F6;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #ffffff;
 
-            --col-new-bg: #E0F2FE;
-            --col-new-text: #0369A1;
+            --status-new-bg: #E0F2FE;
+            --status-new-text: #0284C7;
 
-            --col-progress-bg: #FEF3C7;
-            --col-progress-text: #B45309;
+            --status-active-bg: #FEF3C7;
+            --status-active-text: #D97706;
 
-            --col-done-bg: #DCFCE7;
-            --col-done-text: #15803D;
-
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        /* Dark Mode Support via Telegram Params */
-        body.dark-mode {
-            --bg-color: #111827;
-            --card-bg: #1F2937;
-            --text-primary: #F9FAFB;
-            --text-secondary: #9CA3AF;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --status-done-bg: #DCFCE7;
+            --status-done-text: #16A34A;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
             margin: 0;
             padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            /* Prevent scrolling body inside TG */
+            /* iOS Fix */
+            -webkit-tap-highlight-color: transparent;
         }
 
+        /* Fixed Header */
         header {
-            padding: 16px;
-            background: var(--card-bg);
-            box-shadow: var(--shadow-sm);
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            margin-bottom: 12px;
         }
 
         h1 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             margin: 0;
-            color: var(--accent-color);
-        }
-
-        .board-container {
             display: flex;
-            overflow-x: auto;
-            overflow-y: hidden;
-            flex-grow: 1;
-            padding: 16px;
-            gap: 16px;
-            scroll-snap-type: x mandatory;
-        }
-
-        .column {
-            min-width: 280px;
-            width: 85vw;
-            max-width: 320px;
-            background: rgba(255, 255, 255, 0.5);
-            /* Glass-ish */
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            scroll-snap-align: center;
-            height: 100%;
-        }
-
-        .column-header {
-            padding: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
+            gap: 8px;
         }
 
-        .col-new .column-header {
-            background: var(--col-new-bg);
-            color: var(--col-new-text);
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            /* Hide scrollbar */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
-        .col-progress .column-header {
-            background: var(--col-progress-bg);
-            color: var(--col-progress-text);
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
-        .col-done .column-header {
-            background: var(--col-done-bg);
-            color: var(--col-done-text);
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-hint-color);
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
 
-        .count-badge {
-            background: rgba(255, 255, 255, 0.4);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+        .tab.active {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
         }
 
-        .task-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 12px;
+        /* List Container */
+        .order-list {
+            padding: 16px;
+            padding-bottom: 100px;
+            /* Space for FAB/Bottom */
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
+        /* Card Design */
         .card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: var(--shadow-sm);
-            cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid transparent;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s;
         }
 
         .card:active {
-            cursor: grabbing;
+            transform: scale(0.98);
         }
 
-        .card.sortable-ghost {
-            opacity: 0.4;
-            background: #E5E7EB;
-        }
-
-        .card.sortable-drag {
-            background: var(--card-bg);
-            box-shadow: var(--shadow-md);
-            transform: scale(1.02);
-            opacity: 1;
-        }
-
-        .card-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .card-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 8px;
-            line-height: 1.4;
         }
 
-        .card-meta {
+        .client-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--tg-theme-text-color);
+        }
+
+        .order-price {
+            font-weight: 700;
+            color: var(--tg-theme-button-color);
+            font-size: 15px;
+        }
+
+        .card-body {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
             font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            border-top: 1px solid #F3F4F6;
-            padding-top: 8px;
-        }
-
-        .card-price {
-            font-weight: 600;
-            color: var(--accent-color);
-        }
-
-        .btn-analyze {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            border: none;
-            color: white;
             padding: 4px 8px;
             border-radius: 6px;
-            font-size: 10px;
             font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .card-actions {
+        .status-new {
+            background: var(--status-new-bg);
+            color: var(--status-new-text);
+        }
+
+        .status-active {
+            background: var(--status-active-bg);
+            color: var(--status-active-text);
+        }
+
+        .status-done {
+            background: var(--status-done-bg);
+            color: var(--status-done-text);
+        }
+
+        /* AI Button */
+        .btn-ai {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
             display: flex;
             align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
         }
 
-        .ai-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
+        .ai-result {
+            margin-top: 12px;
+            background: #F3E8FF;
+            color: #6B21A8;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
         }
 
-        /* Floating AI Action Button */
-        .fab {
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            opacity: 0.5;
+        }
+
+        /* Action Sheet (Custom) */
+        .actions-sheet {
+            display: none;
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--text-primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-md);
-            font-size: 24px;
-            cursor: pointer;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
             z-index: 100;
+            animation: slideUp 0.2s ease-out;
         }
 
-        /* Modal */
-        .modal {
+        .overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 90;
         }
 
-        .modal.active {
-            display: flex;
+        .overlay.active,
+        .actions-sheet.active {
+            display: block;
         }
 
-        .modal-content {
-            background: var(--card-bg);
+        .sheet-btn {
             width: 100%;
-            max-width: 400px;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: var(--shadow-md);
+            padding: 14px;
+            background: var(--tg-theme-bg-color);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--tg-theme-text-color);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .sheet-btn.primary {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
+
+        .sheet-btn.danger {
+            color: #EF4444;
+            background: #FEF2F2;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -276,191 +290,212 @@
 <body>
 
     <header>
-        <h1>Smart CRM 🧠</h1>
-        <div id="user-name" style="font-size: 12px; font-weight: 500;">Admin</div>
+        <div class="header-top">
+            <h1>🧠 Smart CRM</h1>
+            <div id="loading-indicator" style="display:none; font-size:12px; color:var(--tg-theme-hint-color);">
+                Updating...</div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="filterList('new', this)">🔥 New (<span id="count-new">0</span>)</div>
+            <div class="tab" onclick="filterList('in_progress', this)">⏳ Active (<span id="count-active">0</span>)</div>
+            <div class="tab" onclick="filterList('completed', this)">✅ Done (<span id="count-done">0</span>)</div>
+        </div>
     </header>
 
-    <div class="board-container">
-        <!-- Column 1: New -->
-        <div class="column col-new">
-            <div class="column-header">
-                <span>🔥 Новые</span>
-                <span class="count-badge" id="count-new">0</span>
-            </div>
-            <div class="task-list" id="list-new" data-status="new">
-                <!-- Cards will be injected here -->
-            </div>
-        </div>
-
-        <!-- Column 2: In Progress -->
-        <div class="column col-progress">
-            <div class="column-header">
-                <span>⏳ В работе</span>
-                <span class="count-badge" id="count-pending">0</span>
-            </div>
-            <div class="task-list" id="list-progress" data-status="in_progress">
-                <!-- Cards here -->
-            </div>
-        </div>
-
-        <!-- Column 3: Done -->
-        <div class="column col-done">
-            <div class="column-header">
-                <span>✅ Готово</span>
-                <span class="count-badge" id="count-done">0</span>
-            </div>
-            <div class="task-list" id="list-done" data-status="completed">
-                <!-- Cards here -->
-            </div>
-        </div>
+    <div class="order-list" id="order-container">
+        <!-- Cards injected via JS -->
     </div>
 
-    <!-- AI FAB -->
-    <div class="fab" onclick="Telegram.WebApp.showAlert('AI Assistant coming soon!')">✨</div>
+    <!-- Actions Sheet -->
+    <div class="overlay" onclick="closeActions()"></div>
+    <div class="actions-sheet" id="actions-sheet">
+        <h3 id="sheet-title" style="margin-top:0; margin-bottom:16px;">Order Actions</h3>
+        <button class="sheet-btn primary" onclick="moveOrder('in_progress')">Move to Active ⏳</button>
+        <button class="sheet-btn" onclick="moveOrder('completed')">Mark as Done ✅</button>
+        <button class="sheet-btn danger" onclick="moveOrder('cancelled')">Cancel Order ❌</button>
+        <button class="sheet-btn" onclick="closeActions()"
+            style="margin-top:10px; background:transparent;">Cancel</button>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Dark mode handling
-        if (tg.colorScheme === 'dark') {
-            document.body.classList.add('dark-mode');
+        // Apply Native Theme
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+        document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#ffffff');
+
+        let allOrders = [];
+        let currentFilter = 'new';
+        let selectedOrderId = null;
+
+        // --- API Functions ---
+
+        async function fetchOrders() {
+            document.getElementById('loading-indicator').style.display = 'block';
+            try {
+                const headers = { 'X-Telegram-User': '6066116812' }; // Demo ID
+                const res = await fetch('/api/bookings', { headers });
+                allOrders = await res.json();
+                renderList();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                document.getElementById('loading-indicator').style.display = 'none';
+            }
         }
 
-        async function analyzeOrder(orderId, event) {
-            event.stopPropagation(); // Prevent card click
-            const btn = event.target;
-            btn.textContent = "🤔 Thinking...";
+        async function analyzeOrder(id, event) {
+            event.stopPropagation();
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span style="opacity:0.7">Thinking...</span>`;
             btn.disabled = true;
 
             try {
+                tg.HapticFeedback.impactOccurred('medium');
                 const headers = { 'X-Telegram-User': '6066116812' };
-                const res = await fetch(`/api/orders/${orderId}/analyze`, { method: 'POST', headers });
+                const res = await fetch(`/api/orders/${id}/analyze`, { method: 'POST', headers });
                 const data = await res.json();
 
                 if (data.analysis) {
                     tg.HapticFeedback.notificationOccurred('success');
-                    fetchOrders(); // Refresh UI
-                } else {
-                    btn.textContent = "❌ Error";
+                    fetchOrders(); // Refresh to show result
                 }
             } catch (e) {
-                console.error("Analyze failed:", e);
-                btn.textContent = "❌ Error";
+                tg.HapticFeedback.notificationOccurred('error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
-        async function fetchOrders() {
-            try {
-                // Add admin header mockup (in prod use initData)
-                const headers = { 'X-Telegram-User': '6066116812' }; // Hardcoded ADMIN_ID for demo
-                const response = await fetch('/api/bookings', { headers });
-                const orders = await response.json();
-                renderCards(orders);
-            } catch (e) {
-                console.error("Failed to fetch orders:", e);
-                // Fallback to empty or show error
-            }
-        }
+        async function moveOrder(newStatus) {
+            if (!selectedOrderId) return;
 
-        async function updateStatus(orderId, newStatus) {
+            closeActions();
+            // Optimistic UI update
+            const order = allOrders.find(o => o.id == selectedOrderId);
+            if (order) order.status = newStatus;
+            renderList();
+
             try {
-                const headers = {
-                    'X-Telegram-User': '6066116812',
-                    'Content-Type': 'application/json'
-                };
-                await fetch(`/api/orders/${orderId}/status`, {
+                const headers = { 'X-Telegram-User': '6066116812', 'Content-Type': 'application/json' };
+                await fetch(`/api/orders/${selectedOrderId}/status`, {
                     method: 'POST',
-                    headers: headers,
+                    headers,
                     body: JSON.stringify({ status: newStatus })
                 });
                 tg.HapticFeedback.notificationOccurred('success');
             } catch (e) {
-                console.error("Update failed:", e);
-                tg.HapticFeedback.notificationOccurred('error');
+                console.error(e);
+                // Revert fetch needed in real app
             }
         }
 
-        function renderCards(orders) {
-            // Clear lists
-            document.getElementById('list-new').innerHTML = '';
-            document.getElementById('list-progress').innerHTML = '';
-            document.getElementById('list-done').innerHTML = '';
+        // --- UI Functions ---
 
-            let counts = { new: 0, in_progress: 0, completed: 0 };
+        function filterList(status, tabElement) {
+            currentFilter = status;
 
-            orders.forEach(order => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.setAttribute('data-id', order.id);
+            // UI Tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tabElement.classList.add('active');
 
-                // Map API fields to UI
-                // API: id, client, service, budget, desc, status, ai_summary
-                const aiSummary = order.ai_summary;
-
-                card.innerHTML = `
-                    <div class="card-title">${order.client}</div>
-                    <div class="card-desc">${order.desc || order.service}</div>
-                    <div class="card-meta">
-                        <span class="card-price">${order.budget || '-'}</span>
-                        <div class="card-actions">
-                            ${aiSummary ? `<span class="ai-badge">✨ ${aiSummary}</span>` :
-                        `<button class="btn-analyze" onclick="analyzeOrder('${order.id}', event)">⚡ Analyze</button>`}
-                        </div>
-                    </div>
-                `;
-
-                // Status mapping logic
-                // API statuses: new, in_progress, completed, cancelled, negotiation_pending
-                // We map them to our 3 columns
-                let listId = 'list-new';
-                let colStatus = 'new';
-
-                if (['in_progress', 'negotiation_pending'].includes(order.status)) {
-                    listId = 'list-progress';
-                    colStatus = 'in_progress';
-                }
-                if (['completed', 'cancelled'].includes(order.status)) {
-                    listId = 'list-done';
-                    colStatus = 'completed';
-                }
-
-                document.getElementById(listId).appendChild(card);
-
-                // Count
-                if (counts[colStatus] !== undefined) counts[colStatus]++;
-            });
-
-            // Update badges
-            document.getElementById('count-new').textContent = counts.new;
-            document.getElementById('count-pending').textContent = counts.in_progress;
-            document.getElementById('count-done').textContent = counts.completed;
+            tg.HapticFeedback.selectionChanged();
+            renderList();
         }
 
-        // Initialize Sortable
-        ['list-new', 'list-progress', 'list-done'].forEach(id => {
-            new Sortable(document.getElementById(id), {
-                group: 'kanban',
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                delay: 100,
-                delayOnTouchOnly: true,
-                onEnd: function (evt) {
-                    const itemEl = evt.item;
-                    const newColStatus = evt.to.getAttribute('data-status'); // new, in_progress, completed
-                    const orderId = itemEl.getAttribute('data-id');
+        function renderList() {
+            const container = document.getElementById('order-container');
+            container.innerHTML = '';
 
-                    console.log(`Moved ${orderId} to ${newColStatus}`);
-                    updateStatus(orderId, newColStatus);
+            // Group statuses
+            let filtered = [];
+            if (currentFilter === 'new') {
+                filtered = allOrders.filter(o => o.status === 'new');
+            } else if (currentFilter === 'in_progress') {
+                filtered = allOrders.filter(o => ['in_progress', 'negotiation_pending'].includes(o.status));
+            } else if (currentFilter === 'completed') {
+                filtered = allOrders.filter(o => ['completed', 'cancelled'].includes(o.status));
+            }
+
+            // Update Counts
+            document.getElementById('count-new').innerText = allOrders.filter(o => o.status === 'new').length;
+            document.getElementById('count-active').innerText = allOrders.filter(o => ['in_progress', 'negotiation_pending'].includes(o.status)).length;
+            document.getElementById('count-done').innerText = allOrders.filter(o => ['completed', 'cancelled'].includes(o.status)).length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">📭</span>
+                        <div>No orders in this tab</div>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openActions(order);
+
+                // Badge Logic
+                let badgeClass = 'status-new';
+                if (currentFilter === 'in_progress') badgeClass = 'status-active';
+                if (currentFilter === 'completed') badgeClass = 'status-done';
+
+                // AI Section
+                let aiHtml = '';
+                if (order.ai_summary) {
+                    aiHtml = `<div class="ai-result"><span>✨</span> <span>${order.ai_summary}</span></div>`;
+                } else {
+                    aiHtml = `
+                        <button class="btn-ai" onclick="analyzeOrder('${order.id}', event)">
+                            ⚡ Analyze w/ AI
+                        </button>
+                    `;
                 }
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="client-name">${order.client}</div>
+                        <div class="order-price">${order.budget || ''}</div>
+                    </div>
+                    <div class="card-body">
+                        ${order.desc || order.service || 'No description'}
+                    </div>
+                    <div class="card-footer">
+                        <div class="status-badge ${badgeClass}">${order.status}</div>
+                        ${!order.ai_summary ? aiHtml : ''}
+                    </div>
+                    ${order.ai_summary ? aiHtml : ''}
+                `;
+                container.appendChild(card);
             });
-        });
+        }
+
+        // Action Sheet Logic
+        function openActions(order) {
+            selectedOrderId = order.id;
+            document.getElementById('sheet-title').innerText = `Manage: ${order.client}`;
+            document.querySelector('.overlay').classList.add('active');
+            document.getElementById('actions-sheet').classList.add('active');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function closeActions() {
+            document.querySelector('.overlay').classList.remove('active');
+            document.getElementById('actions-sheet').classList.remove('active');
+        }
 
         // Init
         fetchOrders();
-        // Poll every 10 seconds for updates
-        setInterval(fetchOrders, 10000);
+        setInterval(fetchOrders, 10000); // Auto-refresh
 
     </script>
 </body>
