@@ -33,6 +33,8 @@
             --radius-l: 20px;
             --radius-m: 14px;
             --radius-s: 8px;
+
+            --nav-height: 80px;
         }
 
         /* Dark Mode Override */
@@ -53,6 +55,52 @@
             padding: 0;
             -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
+            padding-bottom: var(--nav-height);
+            /* Space for Nav */
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 40;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        body.dark-mode .bottom-nav {
+            background: rgba(28, 28, 30, 0.85);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 60px;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
         }
 
         /* Header */
@@ -110,12 +158,17 @@
         }
 
         /* List */
-        .order-list {
+        .view-section {
+            display: none;
             padding: 20px;
+            padding-bottom: 40px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .view-section.active {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            padding-bottom: 100px;
         }
 
         /* Premium Card */
@@ -125,7 +178,7 @@
             padding: 20px;
             box-shadow: var(--shadow-card);
             border: 1px solid var(--border-light);
-            transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: transform 0.1s;
             position: relative;
         }
 
@@ -162,11 +215,22 @@
             line-height: 1.4;
         }
 
-        .card-footer {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* Placeholder styling */
+        .coming-soon-card {
+            background: var(--surface-color);
+            border-radius: var(--radius-l);
+            padding: 40px 20px;
+            text-align: center;
+            border: 1px dashed var(--text-secondary);
+            opacity: 0.7;
         }
+
+        .coming-soon-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
 
         /* Minimal AI Button */
         .btn-ai {
@@ -195,7 +259,7 @@
             border-left: 3px solid #6366f1;
         }
 
-        /* Detail View */
+        /* Detail View SPA */
         #detail-view {
             background: var(--surface-color) !important;
         }
@@ -280,21 +344,14 @@
             color: white;
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
             }
-        }
-
-        .card {
-            animation: fadeIn 0.3s ease-out forwards;
         }
 
         .empty-state {
@@ -307,26 +364,112 @@
 
 <body>
 
-    <header>
+    <!-- Header (Dynamic) -->
+    <header id="main-header">
         <div class="header-top">
-            <h1>Smart CRM <span style="font-size:12px; opacity:0.5; font-weight:500;">Beta</span></h1>
+            <h1 id="page-title">Orders</h1>
             <div id="loading-indicator"
                 style="display:none; width: 8px; height: 8px; border-radius:50%; background:var(--primary-color);">
             </div>
         </div>
 
-        <div class="tabs">
+        <!-- Tabs only for Orders view -->
+        <div class="tabs" id="order-tabs">
             <div class="tab active" onclick="filterList('new', this)">New</div>
             <div class="tab" onclick="filterList('in_progress', this)">Active</div>
             <div class="tab" onclick="filterList('completed', this)">History</div>
         </div>
     </header>
 
-    <div class="order-list" id="order-container">
+    <!-- VIEW: ORDERS -->
+    <div id="view-orders" class="view-section active">
         <!-- Cards injected via JS -->
     </div>
 
-    <!-- Detail View SPA -->
+    <!-- VIEW: CATALOG -->
+    <div id="view-catalog" class="view-section">
+        <div class="coming-soon-card">
+            <span class="coming-soon-icon">🛍️</span>
+            <h3>Product Catalog</h3>
+            <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">Manage your products, prices,
+                and stock directly from here.</p>
+            <button class="btn-ai" style="opacity:0.5; cursor: default;">Coming Soon</button>
+        </div>
+
+        <!-- Fake List Item -->
+        <div class="card" style="opacity: 0.5; filter: grayscale(1);">
+            <div class="card-header">
+                <div class="client-name">Manicure Gel Polish</div>
+                <div class="order-price">$25</div>
+            </div>
+            <div class="card-body">Sample product item...</div>
+        </div>
+    </div>
+
+    <!-- VIEW: CLIENTS -->
+    <div id="view-clients" class="view-section">
+        <div class="coming-soon-card">
+            <span class="coming-soon-icon">👥</span>
+            <h3>Client Database</h3>
+            <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">View purchase history, LTV, and
+                AI-generated notes for every client.</p>
+            <button class="btn-ai" style="opacity:0.5; cursor: default;">Coming Soon</button>
+        </div>
+    </div>
+
+    <!-- VIEW: SETTINGS -->
+    <div id="view-settings" class="view-section">
+        <div class="coming-soon-card">
+            <span class="coming-soon-icon">⚙️</span>
+            <h3>Store Settings</h3>
+            <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">Configure your shop, payment
+                methods, and AI behavior.</p>
+            <button class="btn-ai" style="opacity:0.5; cursor: default;">Coming Soon</button>
+        </div>
+    </div>
+
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('orders', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 20V10H4L2 2h20l-2 8h-5v10"></path>
+            </svg>
+            <span>Orders</span>
+        </div>
+        <div class="nav-item" onclick="switchView('catalog', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span>Catalog</span>
+        </div>
+        <div class="nav-item" onclick="switchView('clients', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Clients</span>
+        </div>
+        <div class="nav-item" onclick="switchView('settings', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </svg>
+            <span>Profile</span>
+        </div>
+    </div>
+
+    <!-- Detail View SPA (Overlay) -->
     <div id="detail-view"
         style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 50; overflow-y: auto;">
 
@@ -393,6 +536,33 @@
         let currentFilter = 'new';
         let currentDetailId = null;
 
+        // --- NAVIGATION ---
+        function switchView(viewName, navItem) {
+            // Update Title
+            const titles = {
+                'orders': 'Orders',
+                'catalog': 'Catalog',
+                'clients': 'Clients',
+                'settings': 'My Profile'
+            };
+            document.getElementById('page-title').innerText = titles[viewName];
+
+            // Toggle Tabs Visibility
+            const tabs = document.getElementById('order-tabs');
+            if (viewName === 'orders') tabs.style.display = 'flex';
+            else tabs.style.display = 'none';
+
+            // Switch Sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            // Update Nav Icons
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navItem.classList.add('active');
+
+            tg.HapticFeedback.selectionChanged();
+        }
+
         // --- API Functions ---
 
         async function fetchOrders() {
@@ -414,7 +584,6 @@
             const btn = event.target.closest('.btn-ai');
             const originalText = btn.innerHTML;
             btn.innerHTML = `<span style="opacity:0.7">Thinking...</span>`;
-            // btn.disabled = true;
 
             try {
                 tg.HapticFeedback.impactOccurred('medium');
@@ -453,7 +622,7 @@
             } catch (e) { console.error(e); }
         }
 
-        // --- Navigation ---
+        // --- Detail View Logic ---
 
         function openDetails(orderId) {
             currentDetailId = orderId;
@@ -479,8 +648,11 @@
                 aiDiv.innerHTML = ``;
             }
 
-            document.getElementById('order-container').style.display = 'none';
-            document.querySelector('header').style.display = 'none';
+            // Hide Main & Show Detail
+            document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+            document.querySelector('.bottom-nav').style.display = 'none'; // Hide nav
+            document.getElementById('main-header').style.display = 'none';
+
             document.getElementById('detail-view').style.display = 'block';
 
             tg.BackButton.show();
@@ -489,11 +661,20 @@
 
         function closeDetails() {
             document.getElementById('detail-view').style.display = 'none';
-            document.getElementById('order-container').style.display = 'flex';
-            document.querySelector('header').style.display = 'block';
+
+            // Restore Views
+            const activeViewId = document.querySelector('.view-section.active').id;
+            document.querySelectorAll('.view-section').forEach(el => el.removeAttribute('style')); // Clear inline display:none
+
+            // Restore Nav & Header
+            document.querySelector('.bottom-nav').style.display = 'flex';
+            document.getElementById('main-header').style.display = 'block';
+
             tg.BackButton.hide();
             currentDetailId = null;
         }
+
+        // --- Filtering ---
 
         function filterList(status, tabElement) {
             currentFilter = status;
@@ -504,7 +685,7 @@
         }
 
         function renderList() {
-            const container = document.getElementById('order-container');
+            const container = document.getElementById('view-orders');
             container.innerHTML = '';
 
             let filtered = [];
@@ -521,9 +702,6 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openDetails(order.id);
-
-                let badge = "";
-                // Logic for badge if needed, using text color instead
 
                 let aiHtml = '';
                 if (order.ai_summary) {
