@@ -22,6 +22,7 @@ def cases_kb() -> InlineKeyboardMarkup:
     Portfolio / Cases Menu
     """
     kb = [
+        [InlineKeyboardButton(text="🥗 Calorie AI (Vision)", callback_data="case_calorie")],
         [InlineKeyboardButton(text="🍔 Доставка еды (Bot)", callback_data="case_food")],
         [InlineKeyboardButton(text="🎓 Онлайн-школа (LMS)", callback_data="case_school")],
         [InlineKeyboardButton(text="💅 Салон красоты (CRM)", callback_data="case_beauty")],

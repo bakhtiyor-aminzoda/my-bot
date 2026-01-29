@@ -41,6 +41,16 @@ CASES_INFO = {
         "• Бот присылает подтверждение и напоминание.\n"
         "• Админ видит всё расписание на телефоне.\n\n"
         "<b>Итог:</b> Количество неявок сократилось на 40%."
+    ),
+    "calorie": (
+        "🥗 <b>Кейс: Calorie AI (Computer Vision)</b>\n\n"
+        "<b>Tech Stack:</b> Python, Gemini 1.5 Flash, OpenCV.\n\n"
+        "<b>Задача:</b> Определять КБЖУ блюда по одной фотографии.\n\n"
+        "<b>Решение:</b>\n"
+        "• ИИ распознает ингредиенты на фото.\n"
+        "• Рассчитывает граммовки и калорийность.\n"
+        "• Ведет статистику пользователя.\n\n"
+        "<b>Итог:</b> MVP запущен за 3 дня. Точность распознавания >90%."
     )
 }
 
@@ -274,6 +284,25 @@ async def cmd_admin_panel(message: types.Message):
         parse_mode="HTML"
     )
 
+@router.message(Command("smadmin"))
+async def cmd_smadmin(message: types.Message):
+    """Opens the Smart CRM Mini App."""
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    base_url = os.getenv("WEBHOOK_URL", "https://google.com")
+    crm_url = f"{base_url}/crm/index.html"
+    
+    kb = InlineKeyboardBuilder()
+    kb.button(text="🧠 Open Smart CRM", web_app=types.WebAppInfo(url=crm_url))
+    
+    await message.answer(
+        "<b>🧠 Smart CRM (Kanban + AI)</b>\n\n"
+        "Управление лидами, статусы и AI-аналитика.",
+        reply_markup=kb.as_markup(),
+        parse_mode="HTML"
+    )
+
 @router.message(Command("seed"))
 async def cmd_seed(message: types.Message):
     """Admin command: Seed DB with dummy data."""
@@ -306,6 +335,7 @@ async def nav_cases(callback: types.CallbackQuery):
     back = await get_text(callback.from_user.id, "btn_back")
     
     kb = types.InlineKeyboardMarkup(inline_keyboard=[
+        [types.InlineKeyboardButton(text="🥗 Calorie AI (Vision)", callback_data="case_calorie")],
         [types.InlineKeyboardButton(text=c1, callback_data="case_food")],
         [types.InlineKeyboardButton(text=c2, callback_data="case_school")],
         [types.InlineKeyboardButton(text=c3, callback_data="case_beauty")],

@@ -82,9 +82,48 @@ async def get_bookings_list(request):
             "client": o.name or "Unknown",
             "service": o.service_context or "Service",
             "time": o.created_at.isoformat() if o.created_at else None,
-            "status": o.status
+            "status": o.status,
+            "budget": o.budget,
+            "desc": o.task_description,
+            "ai_summary": o.admin_comment
         })
     return web.json_response(data)
+
+@require_admin
+async def analyze_order(request):
+    """POST /api/orders/{id}/analyze"""
+    order_id = int(request.match_info['id'])
+    
+    order = await get_order_by_id(order_id)
+    if not order:
+        return web.json_response({"error": "Order not found"}, status=404)
+        
+    # Lazy load AI model
+    from bot.ai_service import model
+    if not model:
+        return web.json_response({"error": "AI not initialized"}, status=503)
+        
+    prompt = (
+        f"Ты — бизнес-ассистент. Проанализируй этот лид:\n"
+        f"Имя: {order.name}\n"
+        f"Задача: {order.task_description}\n"
+        f"Бюджет: {order.budget}\n\n"
+        f"1. Оцени теплоту лида (Холодный/Теплый/Горячий).\n"
+        f"2. Дай 1 совет, что ему написать.\n"
+        f"Ответ очень кратко (макс 10 слов)."
+    )
+    
+    try:
+        response = await model.generate_content_async(prompt)
+        analysis = response.text.strip()
+        
+        # Save to DB
+        await db_update_order_details(order_id, {"admin_comment": analysis})
+        
+        return web.json_response({"analysis": analysis})
+    except Exception as e:
+        print(f"AI Analysis Error: {e}")
+        return web.json_response({"error": str(e)}, status=500)
 
 @require_admin
 async def get_order_details(request):

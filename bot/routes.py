@@ -4,7 +4,7 @@ from bot.api import (
     get_order_details, update_order_status, update_order_details, 
     send_broadcast, create_client_order, negotiate_order,
     get_products_list, create_product, update_product_endpoint, delete_product_endpoint,
-    get_client_referrals
+    get_client_referrals, analyze_order
 )
 
 def setup_routes(app: web.Application):
@@ -17,6 +17,7 @@ def setup_routes(app: web.Application):
     app.router.add_get("/api/orders/{id}", get_order_details)
     app.router.add_post("/api/orders/{id}/status", update_order_status)
     app.router.add_post("/api/orders/{id}/update", update_order_details)
+    app.router.add_post("/api/orders/{id}/analyze", analyze_order)
     app.router.add_post("/api/orders/{id}/negotiate", negotiate_order)
     app.router.add_post("/api/broadcast", send_broadcast)
     app.router.add_post("/api/client/orders", create_client_order)
@@ -37,3 +38,4 @@ def setup_routes(app: web.Application):
     # For simplicity, let's serve /admin/ -> bot/static/admin/index.html
     app.router.add_static("/admin", path="bot/static/admin", name="admin")
     app.router.add_static("/shop", path="bot/static/shop", name="shop")
+    app.router.add_static("/crm", path="bot/static/crm", name="crm")
