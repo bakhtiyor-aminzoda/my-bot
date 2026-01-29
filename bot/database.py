@@ -82,6 +82,14 @@ async def init_db():
             logger.info("🔄 Migration: Added Referral columns.")
     except Exception as e:
         logger.info(f"ℹ️ Migration note (referrals): {e}")
+
+    # Auto-migration: Order Items (JSON)
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text("ALTER TABLE orders ADD COLUMN items TEXT DEFAULT '[]';"))
+            logger.info("🔄 Migration: Added 'items' column.")
+    except Exception as e:
+        logger.info(f"ℹ️ Migration note (order items): {e}")
     
     logger.info("✅ Database initialized.")
 
@@ -221,6 +229,7 @@ class Order(Base):
     service_context = Column(String)
     status = Column(String, default="new")
     admin_comment = Column(String, nullable=True) # Comment from Admin to Client
+    items = Column(String, default="[]") # JSON string of items: [{"title": "Pizza", "price": 50, "qty": 1}]
     created_at = Column(DateTime, default=datetime.utcnow)
 
 async def add_order(user_id: int, data: dict):
@@ -233,7 +242,8 @@ async def add_order(user_id: int, data: dict):
             business_type=data.get("business_type"),
             budget=data.get("budget"),
             task_description=data.get("task_description"),
-            service_context=data.get("service_context", "General")
+            service_context=data.get("service_context", "General"),
+            items=data.get("items", "[]") # Handle structured items
         )
         session.add(order)
         await session.commit()
@@ -309,6 +319,7 @@ async def update_order_details(order_id: int, data: dict):
             if "contact_info" in data: order.contact_info = data["contact_info"]
             if "task_description" in data: order.task_description = data["task_description"]
             if "admin_comment" in data: order.admin_comment = data["admin_comment"]
+            if "items" in data: order.items = data["items"] # Allow updating cart
             
             await session.commit()
             return order

@@ -85,7 +85,8 @@ async def get_bookings_list(request):
             "status": o.status,
             "budget": o.budget,
             "desc": o.task_description,
-            "ai_summary": o.admin_comment
+            "ai_summary": o.admin_comment,
+            "items": o.items or "[]"
         })
     return web.json_response(data)
 
@@ -142,6 +143,7 @@ async def get_order_details(request):
         "budget": order.budget,
         "task_description": order.task_description,
         "status": order.status,
+        "items": order.items or "[]",
         "created_at": order.created_at.isoformat() if order.created_at else None
     }
     return web.json_response(data)
@@ -323,21 +325,53 @@ async def create_client_order(request):
         print(f"Web Order Error: {e}")
         return web.json_response({"error": str(e)}, status=500)
 
-async def get_client_referrals(request):
-    """
-    GET /api/client/referrals?user_id=123
-    Returns referral stats for a specific user.
-    """
-    try:
-        user_id = int(request.query.get("user_id"))
-        from bot.database import get_referral_stats
-        count = await get_referral_stats(user_id)
-        return web.json_response({"count": count})
-    except (ValueError, TypeError):
-        return web.json_response({"error": "Invalid user_id"}, status=400)
     except Exception as e:
         print(f"Stats Error: {e}")
         return web.json_response({"count": 0})
+
+@require_admin
+async def get_clients_list(request):
+    """
+    GET /api/clients
+    Returns aggregated stats per user:
+    [{id: 123, name: "Ali", total_orders: 5, total_spend: 5000, last_order: "2023-..."}]
+    """
+    from bot.database import AsyncSessionLocal, Order, select, func
+    
+    async with AsyncSessionLocal() as session:
+        # Group by user_id and aggregate
+        # Note: In a real SQL, we'd join with Users table. 
+        # Here we rely on Order data + aggregation.
+        
+        stmt = (
+            select(
+                Order.user_id, 
+                func.max(Order.name).label('name'), # Take latest name
+                func.max(Order.contact_info).label('contact'),
+                func.count(Order.id).label('count'),
+                func.max(Order.created_at).label('last_seen')
+                # For sum, budget is string "5000 TJS", detailed parsing needed in real app.
+                # using Count as proxy for now for MVP speed.
+            )
+            .group_by(Order.user_id)
+            .order_by(func.count(Order.id).desc())
+        )
+        
+        result = await session.execute(stmt)
+        rows = result.all()
+        
+        clients = []
+        for r in rows:
+            clients.append({
+                "id": r.user_id,
+                "name": r.name or "Unknown",
+                "contact": r.contact,
+                "orders_count": r.count,
+                "last_seen": r.last_seen.isoformat() if r.last_seen else None,
+                "ltv_grade": "VIP" if r.count > 3 else "New" # Simple segmentation logic
+            })
+            
+        return web.json_response(clients)
 
 async def get_products_list(request):
     """GET /api/products"""

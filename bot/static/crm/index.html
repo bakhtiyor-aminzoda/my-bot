@@ -728,6 +728,47 @@
         </div>
     </div>
 
+    <!-- ORDER EDITOR MODAL -->
+    <div class="modal-overlay" id="order-editor-modal" style="z-index: 70;">
+        <div class="modal-sheet" style="height:95vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h2 style="margin:0; font-size:20px;">Edit Order</h2>
+                <div onclick="closeOrderEditor()" style="padding:8px; cursor:pointer; color:var(--text-secondary);">✕
+                </div>
+            </div>
+
+            <!-- Cart Items -->
+            <div id="editor-cart-list" style="flex:1; overflow-y:auto; margin-bottom:16px;">
+                <!-- Filled via JS -->
+            </div>
+
+            <div style="border-top:1px solid var(--border-light); padding-top:16px;">
+                <div
+                    style="display:flex; justify-content:space-between; margin-bottom:16px; font-weight:700; font-size:18px;">
+                    <span>Total</span>
+                    <span id="editor-total">0 TJS</span>
+                </div>
+
+                <div style="display:flex; gap:12px;">
+                    <button onclick="showProductPicker()" class="btn-main" style="background:#F2F2F7; color:black;">+
+                        Add Item</button>
+                    <button onclick="saveOrderChanges()" class="btn-main btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT PICKER (Nested) -->
+    <div class="modal-overlay" id="picker-modal" style="z-index: 80;">
+        <div class="modal-sheet">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0;">Add Product</h3>
+                <div onclick="document.getElementById('picker-modal').style.display='none'" style="padding:4px;">✕</div>
+            </div>
+            <div id="picker-grid" class="catalog-grid"></div>
+        </div>
+    </div>
+
     <!-- VIEW: SETTINGS -->
     <div id="view-settings" class="view-section">
         <div class="coming-soon-card">
