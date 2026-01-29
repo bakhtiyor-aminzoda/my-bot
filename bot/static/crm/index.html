@@ -1114,7 +1114,42 @@
             });
         }
 
-        // --- PRODUCT CATALOG LOGIC ---
+        // --- BROADCAST LOGIC ---
+        function openBroadcastModal() {
+            document.getElementById('broadcast-modal').style.display = 'flex';
+            document.getElementById('broadcast-text').addEventListener('input', (e) => {
+                document.getElementById('broadcast-preview').innerText = e.target.value || '...';
+            });
+        }
+        function closeBroadcastModal() {
+            document.getElementById('broadcast-modal').style.display = 'none';
+        }
+
+        async function sendBroadcast() {
+            const text = document.getElementById('broadcast-text').value;
+            if (!text) {
+                tg.HapticFeedback.notificationOccurred('error');
+                return;
+            }
+
+            if (!confirm("Are you sure? This will be sent to ALL clients.")) return;
+
+            try {
+                const headers = { 'X-Telegram-User': '6066116812', 'Content-Type': 'application/json' };
+                await fetch('/api/broadcast', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ message: text })
+                });
+
+                tg.HapticFeedback.notificationOccurred('success');
+                alert("Broadcast Sent! 🚀");
+                closeBroadcastModal();
+            } catch (e) {
+                console.error(e);
+                alert("Error sending broadcast");
+            }
+        }
 
         async function fetchProducts() {
             try {
