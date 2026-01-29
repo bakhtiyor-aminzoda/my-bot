@@ -485,18 +485,101 @@
 
         /* Gold */
 
-        /* Modal */
+        /* Model */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 60;
-            align-items: flex-end;
-            /* Bottom sheet logic */
+            /* ... */
+        }
+
+        /* Dashboard & Profile */
+        .profile-card {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            color: white;
+            padding: 24px;
+            border-radius: var(--radius-l);
+            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.25);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-role {
+            font-size: 13px;
+            opacity: 0.8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            padding: 16px;
+            border-radius: var(--radius-m);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-trend {
+            font-size: 11px;
+            color: var(--success-color);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .settings-list {
+            background: var(--surface-color);
+            border-radius: var(--radius-m);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .settings-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
         }
 
         .modal-sheet {
@@ -793,6 +876,7 @@
             // Lazy Load Data
             if (viewName === 'catalog') fetchProducts();
             if (viewName === 'clients') fetchClients();
+            if (viewName === 'settings') fetchStats();
         }
 
         // --- API Functions ---
