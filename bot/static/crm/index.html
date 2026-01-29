@@ -307,11 +307,73 @@
         <!-- Cards injected via JS -->
     </div>
 
+    <!-- Detail View -->
+    <div id="detail-view"
+        style="display:none; background: var(--tg-theme-secondary-bg-color); min-height: 100vh; position: fixed; top: 0; left: 0; right: 0; z-index: 50; overflow-y: auto;">
+        <div class="detail-header"
+            style="position: sticky; top:0; background: var(--tg-theme-bg-color); padding: 16px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <div onclick="closeDetails()" style="font-size: 24px; cursor: pointer;">←</div>
+            <h2 style="margin: 0; font-size: 18px;">Order #<span id="detail-id"></span></h2>
+        </div>
+
+        <div style="padding: 20px;">
+            <!-- Client Card -->
+            <div
+                style="background: var(--tg-theme-bg-color); padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                <div
+                    style="background: #E2E8F0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                    👤</div>
+                <div>
+                    <div id="detail-client" style="font-weight: 700; font-size: 16px;"></div>
+                    <a id="detail-contact" href="#"
+                        style="color: var(--tg-theme-button-color); text-decoration: none; font-size: 14px;"></a>
+                </div>
+            </div>
+
+            <!-- Info Block -->
+            <h3
+                style="font-size: 14px; text-transform: uppercase; color: var(--tg-theme-hint-color); margin-bottom: 12px;">
+                Order Details</h3>
+            <div style="background: var(--tg-theme-bg-color); border-radius: 12px; overflow: hidden;">
+                <div class="detail-row" style="padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <div style="color: var(--tg-theme-hint-color); font-size: 13px;">Service</div>
+                    <div id="detail-service" style="font-weight: 500;"></div>
+                </div>
+                <div class="detail-row" style="padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <div style="color: var(--tg-theme-hint-color); font-size: 13px;">Description</div>
+                    <div id="detail-desc" style="font-weight: 500; line-height: 1.5; margin-top: 4px;"></div>
+                </div>
+                <!-- Budget Highlight -->
+                <div class="detail-row" style="padding: 16px; background: rgba(59, 130, 246, 0.1);">
+                    <div style="color: var(--tg-theme-button-color); font-size: 13px;">Total Budget</div>
+                    <div id="detail-budget"
+                        style="font-weight: 700; font-size: 18px; color: var(--tg-theme-button-color);"></div>
+                </div>
+            </div>
+
+            <!-- AI Section (in details) -->
+            <div id="detail-ai-section" style="margin-top: 24px;"></div>
+
+        </div>
+
+        <!-- Sticky Bottom Actions -->
+        <div
+            style="position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background: var(--tg-theme-secondary-bg-color); box-shadow: 0 -4px 12px rgba(0,0,0,0.05); display: flex; gap: 12px;">
+            <button onclick="updateStatus(currentDetailId, 'in_progress')" class="sheet-btn primary"
+                style="margin:0; font-size: 14px;">Accept</button>
+            <button onclick="updateStatus(currentDetailId, 'completed')" class="sheet-btn"
+                style="margin:0; background: #DCFCE7; color: #16A34A; font-size: 14px;">Complete</button>
+        </div>
+        <!-- Spacer for bottom bar -->
+        <div style="height: 80px;"></div>
+    </div>
+
     <!-- Actions Sheet -->
     <div class="overlay" onclick="closeActions()"></div>
     <div class="actions-sheet" id="actions-sheet">
         <h3 id="sheet-title" style="margin-top:0; margin-bottom:16px;">Order Actions</h3>
-        <button class="sheet-btn primary" onclick="moveOrder('in_progress')">Move to Active ⏳</button>
+        <button class="sheet-btn primary" onclick="openDetailsFromSheet()">📄 View Details</button>
+        <button class="sheet-btn" onclick="moveOrder('in_progress')">Move to Active ⏳</button>
         <button class="sheet-btn" onclick="moveOrder('completed')">Mark as Done ✅</button>
         <button class="sheet-btn danger" onclick="moveOrder('cancelled')">Cancel Order ❌</button>
         <button class="sheet-btn" onclick="closeActions()"
@@ -321,6 +383,7 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.BackButton.onClick(closeDetails);
 
         // Apply Native Theme
         document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
@@ -333,6 +396,7 @@
         let allOrders = [];
         let currentFilter = 'new';
         let selectedOrderId = null;
+        let currentDetailId = null;
 
         // --- API Functions ---
 
@@ -374,28 +438,88 @@
             }
         }
 
-        async function moveOrder(newStatus) {
-            if (!selectedOrderId) return;
-
-            closeActions();
-            // Optimistic UI update
-            const order = allOrders.find(o => o.id == selectedOrderId);
+        async function updateStatus(orderId, newStatus) {
+            // Optimistic UI
+            const order = allOrders.find(o => o.id == orderId);
             if (order) order.status = newStatus;
+
+            // If inside details, close it or reflect change
+            if (currentDetailId) {
+                tg.HapticFeedback.notificationOccurred('success');
+                closeDetails();
+            }
+
             renderList();
 
             try {
                 const headers = { 'X-Telegram-User': '6066116812', 'Content-Type': 'application/json' };
-                await fetch(`/api/orders/${selectedOrderId}/status`, {
+                await fetch(`/api/orders/${orderId}/status`, {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({ status: newStatus })
                 });
-                tg.HapticFeedback.notificationOccurred('success');
             } catch (e) {
                 console.error(e);
-                // Revert fetch needed in real app
             }
         }
+
+        async function moveOrder(newStatus) {
+            if (!selectedOrderId) return;
+            closeActions();
+            updateStatus(selectedOrderId, newStatus);
+        }
+
+        // --- Navigation ---
+
+        async function openDetails(orderId) {
+            currentDetailId = orderId;
+            const order = allOrders.find(o => o.id == orderId);
+            if (!order) return;
+
+            // Fill Data
+            document.getElementById('detail-id').innerText = order.id;
+            document.getElementById('detail-client').innerText = order.client;
+
+            const contactLink = document.getElementById('detail-contact');
+            contactLink.innerText = order.contact_info || "No Contact";
+            contactLink.href = order.contact_info && order.contact_info.includes('@')
+                ? `https://t.me/${order.contact_info.replace('@', '')}`
+                : `tel:${order.contact_info}`;
+
+            document.getElementById('detail-service').innerText = order.service_context || "General";
+            document.getElementById('detail-desc').innerText = order.desc || order.service || "No description";
+            document.getElementById('detail-budget').innerText = order.budget || "0";
+
+            // Inject AI result if exists
+            const aiDiv = document.getElementById('detail-ai-section');
+            if (order.ai_summary) {
+                aiDiv.innerHTML = `<div class="ai-result"><span>✨ AI Note:</span> <span>${order.ai_summary}</span></div>`;
+            } else {
+                aiDiv.innerHTML = `<button class="btn-ai" style="width:100%; justify-content:center; padding:12px;" onclick="analyzeOrder('${order.id}', event)">⚡ Analyze w/ AI</button>`;
+            }
+
+            // Toggle View
+            document.getElementById('order-container').style.display = 'none'; // Hide list
+            document.querySelector('header').style.display = 'none';        // Hide main header
+            document.getElementById('detail-view').style.display = 'block'; // Show detail
+
+            tg.BackButton.show();
+            window.scrollTo(0, 0);
+        }
+
+        function closeDetails() {
+            document.getElementById('detail-view').style.display = 'none';
+            document.getElementById('order-container').style.display = 'flex';
+            document.querySelector('header').style.display = 'block';
+            tg.BackButton.hide();
+            currentDetailId = null;
+        }
+
+        function openDetailsFromSheet() {
+            closeActions();
+            openDetails(selectedOrderId);
+        }
+
 
         // --- UI Functions ---
 
