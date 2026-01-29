@@ -4,7 +4,8 @@ from bot.api import (
     get_order_details, update_order_status, update_order_details, 
     send_broadcast, create_client_order, negotiate_order,
     get_products_list, create_product, update_product_endpoint, delete_product_endpoint,
-    get_client_referrals, analyze_order
+    get_products_list, create_product, update_product_endpoint, delete_product_endpoint,
+    get_client_referrals, analyze_order, get_clients_list, get_current_user_info
 )
 
 def setup_routes(app: web.Application):
@@ -12,6 +13,7 @@ def setup_routes(app: web.Application):
     Registers all API and Web routes.
     """
     # API endpoints for Pocket CRM
+    app.router.add_get("/api/me", get_current_user_info)
     app.router.add_get("/api/stats", get_dashboard_stats)
     app.router.add_get("/api/bookings", get_bookings_list)
     app.router.add_get("/api/orders/{id}", get_order_details)
@@ -22,6 +24,7 @@ def setup_routes(app: web.Application):
     app.router.add_post("/api/broadcast", send_broadcast)
     app.router.add_post("/api/client/orders", create_client_order)
     app.router.add_get("/api/client/referrals", get_client_referrals)
+    app.router.add_get("/api/clients", get_clients_list)
     
     # Product Management
     app.router.add_get("/api/products", get_products_list)

@@ -7,633 +7,7 @@
     <title>Amini CRM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* Premium Palette */
-            --bg-color: #F8F9FA;
-            --surface-color: #FFFFFF;
-            --primary-color: #007AFF;
-            /* Apple Blue */
-            --primary-soft: rgba(0, 122, 255, 0.1);
-            --text-primary: #1C1C1E;
-            --text-secondary: #8E8E93;
-            --border-light: rgba(0, 0, 0, 0.04);
-
-            --success-color: #34C759;
-            --success-soft: rgba(52, 199, 89, 0.1);
-
-            --warning-color: #FF9500;
-            --warning-soft: rgba(255, 149, 0, 0.1);
-
-            --danger-color: #FF3B30;
-
-            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.03);
-            --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.08);
-
-            --radius-l: 20px;
-            --radius-m: 14px;
-            --radius-s: 8px;
-
-            --nav-height: 80px;
-        }
-
-        /* Dark Mode Override */
-        body.dark-mode {
-            --bg-color: #000000;
-            --surface-color: #1C1C1E;
-            --text-primary: #FFFFFF;
-            --text-secondary: #98989D;
-            --border-light: rgba(255, 255, 255, 0.1);
-            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
-            padding-bottom: var(--nav-height);
-            /* Space for Nav */
-        }
-
-        /* Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: var(--nav-height);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 40;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        body.dark-mode .bottom-nav {
-            background: rgba(28, 28, 30, 0.85);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: var(--text-secondary);
-            font-size: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            width: 60px;
-            transition: color 0.2s;
-        }
-
-        .nav-item.active {
-            color: var(--primary-color);
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* Header */
-        header {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 16px 20px 8px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        body.dark-mode header {
-            background: rgba(28, 28, 30, 0.8);
-        }
-
-        h1 {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin: 0 0 16px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* Modern Tabs */
-        .tabs {
-            display: flex;
-            background: rgba(118, 118, 128, 0.12);
-            padding: 2px;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 7px 0;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            border-radius: 8px;
-            cursor: pointer;
-            position: relative;
-            z-index: 2;
-            transition: color 0.2s;
-        }
-
-        .tab.active {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-            background: var(--surface-color);
-        }
-
-        /* List */
-        .view-section {
-            display: none;
-            padding: 20px;
-            padding-bottom: 40px;
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        .view-section.active {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        /* Premium Card */
-        .card {
-            background: var(--surface-color);
-            border-radius: var(--radius-l);
-            padding: 20px;
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--border-light);
-            transition: transform 0.1s;
-            position: relative;
-        }
-
-        .card:active {
-            transform: scale(0.97);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .client-name {
-            font-size: 17px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
-
-        .order-price {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--success-color);
-            background: var(--success-soft);
-            padding: 4px 10px;
-            border-radius: 8px;
-        }
-
-        .card-body {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-
-        /* Placeholder styling */
-        .coming-soon-card {
-            background: var(--surface-color);
-            border-radius: var(--radius-l);
-            padding: 40px 20px;
-            text-align: center;
-            border: 1px dashed var(--text-secondary);
-            opacity: 0.7;
-        }
-
-        .coming-soon-icon {
-            font-size: 40px;
-            margin-bottom: 16px;
-            display: block;
-        }
-
-
-        /* Minimal AI Button */
-        .btn-ai {
-            background: transparent;
-            color: var(--primary-color);
-            font-size: 13px;
-            font-weight: 600;
-            border: 1px solid var(--primary-soft);
-            padding: 8px 14px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-
-        .ai-result {
-            font-size: 12px;
-            color: var(--text-secondary);
-            background: rgba(99, 102, 241, 0.05);
-            padding: 10px;
-            border-radius: var(--radius-m);
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            border-left: 3px solid #6366f1;
-        }
-
-        /* Detail View SPA */
-        #detail-view {
-            background: var(--surface-color) !important;
-        }
-
-        .detail-header {
-            background: var(--surface-color) !important;
-            border-bottom: none !important;
-            padding: 24px 20px !important;
-        }
-
-        .detail-hero {
-            padding: 0 20px;
-            margin-bottom: 30px;
-        }
-
-        .detail-avatar {
-            width: 60px;
-            height: 60px;
-            background: #F2F2F7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 12px;
-        }
-
-        .detail-section {
-            padding: 0 20px;
-            margin-bottom: 30px;
-        }
-
-        .detail-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .detail-value {
-            font-size: 16px;
-            color: var(--text-primary);
-        }
-
-        .action-row {
-            display: flex;
-            gap: 12px;
-            padding: 20px;
-            padding-bottom: 40px;
-            /* Safe area */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, var(--surface-color) 80%, rgba(255, 255, 255, 0));
-        }
-
-        body.dark-mode .action-row {
-            background: linear-gradient(to top, var(--surface-color) 80%, rgba(28, 28, 30, 0));
-        }
-
-        .btn-main {
-            flex: 1;
-            padding: 16px;
-            border-radius: 16px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* Catalog Grid */
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 8px;
-        }
-
-        .product-card {
-            background: var(--surface-color);
-            border-radius: var(--radius-m);
-            padding: 16px;
-            box-shadow: var(--shadow-card);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            border: 1px solid var(--border-light);
-        }
-
-        .product-icon {
-            font-size: 40px;
-            margin-bottom: 8px;
-        }
-
-        .product-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .product-price {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--primary-color);
-            background: var(--primary-soft);
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-
-        .btn-add-product {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            cursor: pointer;
-            z-index: 30;
-            transition: transform 0.2s;
-        }
-
-        .btn-add-product:active {
-            transform: scale(0.9);
-        }
-
-        /* Client List */
-        .client-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .client-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--surface-color);
-            padding: 16px;
-            border-radius: var(--radius-m);
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--border-light);
-        }
-
-        .client-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .client-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #F2F2F7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 600;
-            color: #8E8E93;
-        }
-
-        .client-details h4 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .client-details p {
-            margin: 2px 0 0 0;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .ltv-badge {
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 6px;
-            background: #F2F2F7;
-            color: var(--text-secondary);
-        }
-
-        .ltv-badge.vip {
-            background: #FFD60A;
-            color: black;
-        }
-
-        /* Gold */
-
-        /* Model */
-        .modal-overlay {
-            /* ... */
-        }
-
-        /* Dashboard & Profile */
-        .profile-card {
-            background: linear-gradient(135deg, var(--primary-color), #0056b3);
-            color: white;
-            padding: 24px;
-            border-radius: var(--radius-l);
-            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.25);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .profile-role {
-            font-size: 13px;
-            opacity: 0.8;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--surface-color);
-            padding: 16px;
-            border-radius: var(--radius-m);
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--border-light);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .stat-trend {
-            font-size: 11px;
-            color: var(--success-color);
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-        }
-
-        .settings-list {
-            background: var(--surface-color);
-            border-radius: var(--radius-m);
-            overflow: hidden;
-            box-shadow: var(--shadow-card);
-        }
-
-        .settings-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .settings-item:last-child {
-            border-bottom: none;
-        }
-
-        .settings-item svg {
-            width: 20px;
-            height: 20px;
-            color: var(--text-secondary);
-        }
-
-        .modal-sheet {
-            background: var(--surface-color);
-            width: 100%;
-            border-radius: 20px 20px 0 0;
-            padding: 24px;
-            box-sizing: border-box;
-            animation: slideUp 0.3s ease-out;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .form-input,
-        .form-select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: var(--bg-color);
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-primary);
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        .form-input:focus {
-            border-color: var(--primary-color);
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-
-            to {
-                transform: translateY(0);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 
 <body>
@@ -681,22 +55,22 @@
 
             <div class="form-group">
                 <label class="form-label">Emoji Icon</label>
-                <input type="text" id="prod-icon" class="form-input" placeholder="🛍 (Just one emoji)" maxlength="2">
+                <input type="text" id="prod-icon" class="premium-input" placeholder="🛍 (Just one emoji)" maxlength="2">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Title</label>
-                <input type="text" id="prod-title" class="form-input" placeholder="e.g. Manicure">
+                <input type="text" id="prod-title" class="premium-input" placeholder="e.g. Manicure">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Price (TJS/USD)</label>
-                <input type="number" id="prod-price" class="form-input" placeholder="100">
+                <input type="number" id="prod-price" class="premium-input" placeholder="100">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Category</label>
-                <select id="prod-category" class="form-select">
+                <select id="prod-category" class="premium-input" style="height:54px;">
                     <option value="bots">Bots</option>
                     <option value="crm">CRM</option>
                     <option value="services">Services</option>
@@ -706,7 +80,7 @@
 
             <div class="form-group">
                 <label class="form-label">Description</label>
-                <textarea id="prod-desc" class="form-input" rows="3" placeholder="Short description..."></textarea>
+                <textarea id="prod-desc" class="premium-input" rows="3" placeholder="Short description..."></textarea>
             </div>
 
             <div style="display:flex; gap:12px; margin-top:24px;">
@@ -771,12 +145,52 @@
 
     <!-- VIEW: SETTINGS -->
     <div id="view-settings" class="view-section">
-        <div class="coming-soon-card">
-            <span class="coming-soon-icon">⚙️</span>
-            <h3>Store Settings</h3>
-            <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">Configure your shop, payment
-                methods, and AI behavior.</p>
-            <button class="btn-ai" style="opacity:0.5; cursor: default;">Coming Soon</button>
+        <!-- Profile Header -->
+        <div class="profile-card">
+            <div class="profile-name" id="profile-name">Admin</div>
+            <div class="profile-role" id="profile-role">Owner</div>
+        </div>
+
+        <!-- Stats Grid (Admin Style) -->
+        <h3>Analytics</h3>
+        <section class="stats-grid">
+            <div class="stat-card blue">
+                <div class="icon">👥</div>
+                <div class="info">
+                    <span class="label">Clients</span>
+                    <h2 id="total-users">...</h2>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="icon">💰</div>
+                <div class="info">
+                    <span class="label">Revenue</span>
+                    <h2 id="stat-revenue">...</h2>
+                </div>
+            </div>
+            <div class="stat-card purple">
+                <div class="icon">📦</div>
+                <div class="info">
+                    <span class="label">Orders</span>
+                    <h2 id="active-orders">...</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings List -->
+        <h3>Settings</h3>
+        <div class="settings-list">
+            <div class="settings-item">
+                <span>Language</span>
+                <span style="color:var(--text-secondary);">English</span>
+            </div>
+            <div class="settings-item">
+                <span>Currency</span>
+                <span style="color:var(--text-secondary);">TJS</span>
+            </div>
+            <div class="settings-item" onclick="location.reload()">
+                <span style="color:var(--danger-color);">Log Out</span>
+            </div>
         </div>
     </div>
 
@@ -1078,25 +492,23 @@
 
             filtered.forEach(order => {
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = 'booking-item';
                 card.onclick = () => openDetails(order.id);
 
-                let aiHtml = '';
-                if (order.ai_summary) {
-                    aiHtml = `<div class="ai-result">⚡ ${order.ai_summary}</div>`;
-                } else {
-                    aiHtml = `<div style="margin-top:12px;"><button class="btn-ai" onclick="analyzeOrder('${order.id}', event)">✨ AI Analyze</button></div>`;
-                }
+                let statusBadge = `<div class="status ${order.status}">${order.status.replace('_', ' ')}</div>`;
+
+                // If AI has summary, show lightning icon instead of status text sometimes? 
+                // Let's keep status visually dominant for CRM.
 
                 card.innerHTML = `
-                    <div class="card-header">
-                        <div class="client-name">${order.client}</div>
-                        <div class="order-price">${order.budget || ''}</div>
+                    <div class="booking-info">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <h4>${order.client}</h4>
+                            ${order.budget ? `<span class="order-price" style="font-size:11px; padding:2px 6px;">${order.budget}</span>` : ''}
+                        </div>
+                        <p>${order.desc || order.service || 'No description'}</p>
+                        ${order.ai_summary ? `<div class="ai-result" style="margin-top:8px; padding:4px 8px; font-size:11px;">⚡ ${order.ai_summary}</div>` : ''}
                     </div>
-                    <div class="card-body">
-                        ${order.desc || order.service || 'No description'}
-                    </div>
-                    ${aiHtml}
                 `;
                 container.appendChild(card);
             });
@@ -1104,11 +516,47 @@
 
         // --- Smart Refresh State ---
         let lastOrdersHash = "";
+        let currentUserRole = 'user';
 
-        // Initial Load
-        fetchOrders();
-        // Smart Polling
-        setInterval(fetchOrders, 5000);
+        document.addEventListener("DOMContentLoaded", async () => {
+            // 1. Get User Role
+            try {
+                const headers = { 'X-Telegram-User': '6066116812' }; // Mock for dev
+                const res = await fetch('/api/me', { headers });
+                const me = await res.json();
+                currentUserRole = me.role;
+
+                // 2. Logic: If Manager, hide sensitive stats
+                if (currentUserRole === 'manager') {
+                    // Hide sensitive stats in Profile
+                    const revEl = document.getElementById('stat-revenue');
+                    if (revEl) {
+                        revEl.innerText = '🔒';
+                        revEl.style.filter = 'blur(4px)';
+                    }
+                }
+            } catch (e) { console.error("Auth Error", e); }
+
+            fetchOrders();
+            fetchProducts();
+            if (typeof fetchClients === 'function') fetchClients();
+            setInterval(fetchOrders, 5000);
+        });
+
+        async function fetchStats() {
+            try {
+                const headers = { 'X-Telegram-User': '6066116812' };
+                const res = await fetch('/api/stats', { headers });
+                const stats = await res.json();
+
+                // Populate Dashboard
+                document.getElementById('total-users').innerText = stats.users_count || 0;
+                document.getElementById('stat-revenue').innerText = (stats.revenue || 0) + " TJS";
+                document.getElementById('active-orders').innerText = stats.orders_count || 0;
+            } catch (e) {
+                console.error("Stats Error:", e);
+            }
+        }
 
         // --- CLIENTS LOGIC ---
 
@@ -1153,6 +601,147 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        // --- ORDER EDITOR LOGIC ---
+        let currentEditingOrder = null;
+        let editingItems = []; // [{title, price, qty}]
+
+        function openOrderEditor() {
+            const orderId = currentDetailId;
+            const order = allOrders.find(o => o.id == orderId);
+            if (!order) return;
+
+            currentEditingOrder = order;
+            try {
+                editingItems = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+                if (!Array.isArray(editingItems)) editingItems = [];
+            } catch (e) { editingItems = []; }
+
+            renderEditorCart();
+            document.getElementById('order-editor-modal').style.display = 'flex';
+        }
+
+        function closeOrderEditor() {
+            document.getElementById('order-editor-modal').style.display = 'none';
+        }
+
+        function renderEditorCart() {
+            const container = document.getElementById('editor-cart-list');
+            container.innerHTML = '';
+
+            let total = 0;
+
+            if (editingItems.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); padding:20px;">Cart is empty</div>`;
+            }
+
+            editingItems.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border-light);";
+
+                const itemTotal = item.price * (item.qty || 1);
+                total += itemTotal;
+
+                row.innerHTML = `
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">${item.title}</div>
+                        <div style="font-size:12px; color:var(--text-secondary);">${item.price} TJS</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button onclick="updateQty(${index}, -1)" style="width:28px; height:28px; border-radius:50%; border:1px solid #ddd; background:white;">-</button>
+                        <span style="font-weight:600; width:20px; text-align:center;">${item.qty || 1}</span>
+                        <button onclick="updateQty(${index}, 1)" style="width:28px; height:28px; border-radius:50%; border:1px solid #ddd; background:white;">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('editor-total').innerText = `${total} TJS`;
+        }
+
+        function updateQty(index, change) {
+            if (!editingItems[index].qty) editingItems[index].qty = 1;
+            editingItems[index].qty += change;
+
+            if (editingItems[index].qty <= 0) {
+                editingItems.splice(index, 1);
+            }
+            renderEditorCart();
+        }
+
+        // Picker
+        async function showProductPicker() {
+            const container = document.getElementById('picker-grid');
+            container.innerHTML = '<div style="padding:20px;">Loading...</div>';
+            document.getElementById('picker-modal').style.display = 'flex';
+
+            // Re-use fetch logic or cache?
+            // Simple fetch for now
+            try {
+                const headers = { 'X-Telegram-User': '6066116812' };
+                const res = await fetch('/api/products', { headers });
+                const products = await res.json();
+
+                container.innerHTML = '';
+                products.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.style.padding = "12px";
+                    card.onclick = () => addItemFromPicker(p);
+                    card.innerHTML = `<div style="font-size:24px;">${p.icon}</div><div style="font-size:12px; font-weight:600;">${p.title}</div><div style="font-size:11px; color:var(--primary-color);">${p.price} TJS</div>`;
+                    container.appendChild(card);
+                });
+            } catch (e) {
+                container.innerHTML = "Error loading products";
+            }
+        }
+
+        function addItemFromPicker(product) {
+            const existing = editingItems.find(i => i.title === product.title);
+            if (existing) {
+                existing.qty = (existing.qty || 1) + 1;
+            } else {
+                editingItems.push({
+                    title: product.title,
+                    price: product.price,
+                    qty: 1
+                });
+            }
+            document.getElementById('picker-modal').style.display = 'none';
+            renderEditorCart();
+        }
+
+        async function saveOrderChanges() {
+            if (!currentEditingOrder) return;
+
+            // Calculate Total
+            const total = editingItems.reduce((sum, i) => sum + (i.price * (i.qty || 1)), 0);
+            const itemsJson = JSON.stringify(editingItems);
+
+            try {
+                const headers = { 'X-Telegram-User': '6066116812', 'Content-Type': 'application/json' };
+                await fetch(`/api/orders/${currentEditingOrder.id}/update`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ items: itemsJson, budget: `${total} TJS` })
+                });
+
+                tg.HapticFeedback.notificationOccurred('success');
+                alert("Order Updated!");
+                closeOrderEditor();
+                fetchOrders(); // Refresh list
+
+                // Update local Detail view if open
+                if (currentDetailId === currentEditingOrder.id) {
+                    // Quick patch or close
+                    closeDetails();
+                    openDetails(currentDetailId); // Re-open to refresh
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Failed to save");
+            }
         }
 
         // --- BROADCAST LOGIC ---

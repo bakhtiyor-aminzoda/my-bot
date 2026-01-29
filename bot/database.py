@@ -40,6 +40,7 @@ class User(Base):
     language_code = Column(String, default="ru")
     invited_by = Column(BigInteger, nullable=True) # Referrer ID
     referral_count = Column(Integer, default=0)    # How many people they invited
+    role = Column(String, default="user")          # 'admin', 'manager', 'user'
     joined_at = Column(DateTime, default=datetime.utcnow)
 
 class Message(Base):
@@ -90,6 +91,14 @@ async def init_db():
             logger.info("🔄 Migration: Added 'items' column.")
     except Exception as e:
         logger.info(f"ℹ️ Migration note (order items): {e}")
+
+    # Auto-migration: User Role
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user';"))
+            logger.info("🔄 Migration: Added 'role' column.")
+    except Exception as e:
+        logger.info(f"ℹ️ Migration note (user role): {e}")
     
     logger.info("✅ Database initialized.")
 
@@ -147,6 +156,12 @@ async def get_referral_stats(user_id: int):
         result = await session.execute(select(User.referral_count).where(User.id == user_id))
         count = result.scalar_one_or_none()
         return count if count else 0
+
+async def get_referred_users(user_id: int):
+    """Returns list of users invited by this user."""
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.invited_by == user_id))
+        return result.scalars().all()
 
 async def get_all_users():
     """Returns a list of all user IDs."""

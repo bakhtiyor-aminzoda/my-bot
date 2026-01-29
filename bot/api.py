@@ -4,7 +4,8 @@ from bot.database import (
     update_order_status as db_update_order_status, 
     update_order_details as db_update_order_details,
     get_daily_stats, get_all_user_ids, add_order,
-    add_product, get_all_products, update_product, delete_product
+    add_product, get_all_products, update_product, delete_product,
+    get_referred_users
 )
 from bot.config import ADMIN_ID
 import asyncio
@@ -329,6 +330,26 @@ async def create_client_order(request):
         print(f"Stats Error: {e}")
         return web.json_response({"count": 0})
 
+async def get_client_referrals(request):
+    """
+    GET /api/client/referrals
+    Headers: X-Telegram-User
+    """
+    user_id = request.headers.get("X-Telegram-User")
+    if not user_id:
+        return web.json_response({"error": "Unauthorized"}, status=401)
+        
+    referrals = await get_referred_users(int(user_id))
+    data = []
+    for r in referrals:
+        data.append({
+            "id": r.id,
+            "name": r.full_name or "Unknown",
+            "date": r.joined_at.isoformat() if r.joined_at else None,
+            "earned": "0 TJS" # Placeholder for cashback logic
+        })
+    return web.json_response(data)
+
 @require_admin
 async def get_clients_list(request):
     """
@@ -417,3 +438,25 @@ async def delete_product_endpoint(request):
 async def health_check(request):
     """Simple health check for Render."""
     return web.Response(text="OK", status=200)
+
+async def get_current_user_info(request):
+    """
+    GET /api/me
+    Headers: X-Telegram-User
+    Returns: { "id": 123, "role": "admin", "name": "Ali" }
+    """
+    user_id = request.headers.get("X-Telegram-User")
+    if not user_id:
+        return web.json_response({"role": "guest"})
+        
+    from bot.database import get_user_role, AsyncSessionLocal, User, select
+    
+    role = await get_user_role(int(user_id))
+    
+    # Get Name/Username
+    async with AsyncSessionLocal() as session:
+        res = await session.execute(select(User).where(User.id == int(user_id)))
+        user = res.scalar_one_or_none()
+        name = user.full_name if user else "Unknown"
+        
+    return web.json_response({"id": user_id, "role": role, "name": name})
