@@ -9,280 +9,298 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Fallback colors (will be overridden by TG Theme) */
-            --tg-theme-bg-color: #F1F5F9;
-            --tg-theme-text-color: #0F172A;
-            --tg-theme-hint-color: #64748B;
-            --tg-theme-button-color: #3B82F6;
-            --tg-theme-button-text-color: #ffffff;
-            --tg-theme-secondary-bg-color: #ffffff;
+            /* Premium Palette */
+            --bg-color: #F8F9FA;
+            --surface-color: #FFFFFF;
+            --primary-color: #007AFF;
+            /* Apple Blue */
+            --primary-soft: rgba(0, 122, 255, 0.1);
+            --text-primary: #1C1C1E;
+            --text-secondary: #8E8E93;
+            --border-light: rgba(0, 0, 0, 0.04);
 
-            --status-new-bg: #E0F2FE;
-            --status-new-text: #0284C7;
+            --success-color: #34C759;
+            --success-soft: rgba(52, 199, 89, 0.1);
 
-            --status-active-bg: #FEF3C7;
-            --status-active-text: #D97706;
+            --warning-color: #FF9500;
+            --warning-soft: rgba(255, 149, 0, 0.1);
 
-            --status-done-bg: #DCFCE7;
-            --status-done-text: #16A34A;
+            --danger-color: #FF3B30;
+
+            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-float: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+            --radius-l: 20px;
+            --radius-m: 14px;
+            --radius-s: 8px;
+        }
+
+        /* Dark Mode Override */
+        body.dark-mode {
+            --bg-color: #000000;
+            --surface-color: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #98989D;
+            --border-light: rgba(255, 255, 255, 0.1);
+            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
             margin: 0;
             padding: 0;
-            /* iOS Fix */
+            -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Fixed Header */
+        /* Header */
         header {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px 20px 8px 20px;
             position: sticky;
             top: 0;
-            z-index: 10;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            z-index: 20;
+            border-bottom: 1px solid var(--border-light);
         }
 
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+        body.dark-mode header {
+            background: rgba(28, 28, 30, 0.8);
         }
 
         h1 {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            margin: 0;
+            letter-spacing: -0.5px;
+            margin: 0 0 16px 0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
         }
 
-        /* Tabs */
+        /* Modern Tabs */
         .tabs {
             display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            /* Hide scrollbar */
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .tabs::-webkit-scrollbar {
-            display: none;
+            background: rgba(118, 118, 128, 0.12);
+            padding: 2px;
+            border-radius: 10px;
+            position: relative;
         }
 
         .tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-hint-color);
+            flex: 1;
+            text-align: center;
+            padding: 7px 0;
             font-size: 13px;
             font-weight: 600;
-            white-space: nowrap;
+            color: var(--text-primary);
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            position: relative;
+            z-index: 2;
+            transition: color 0.2s;
         }
 
         .tab.active {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            background: var(--surface-color);
         }
 
-        /* List Container */
+        /* List */
         .order-list {
-            padding: 16px;
-            padding-bottom: 100px;
-            /* Space for FAB/Bottom */
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
+            padding-bottom: 100px;
         }
 
-        /* Card Design */
+        /* Premium Card */
         .card {
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            background: var(--surface-color);
+            border-radius: var(--radius-l);
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-light);
+            transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
-            overflow: hidden;
-            transition: transform 0.1s;
         }
 
         .card:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .client-name {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--tg-theme-text-color);
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
         }
 
         .order-price {
+            font-size: 16px;
             font-weight: 700;
-            color: var(--tg-theme-button-color);
-            font-size: 15px;
+            color: var(--success-color);
+            background: var(--success-soft);
+            padding: 4px 10px;
+            border-radius: 8px;
         }
 
         .card-body {
             font-size: 14px;
-            color: var(--tg-theme-hint-color);
-            line-height: 1.5;
-            margin-bottom: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.4;
         }
 
         .card-footer {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding-top: 12px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            gap: 10px;
         }
 
-        .status-badge {
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-new {
-            background: var(--status-new-bg);
-            color: var(--status-new-text);
-        }
-
-        .status-active {
-            background: var(--status-active-bg);
-            color: var(--status-active-text);
-        }
-
-        .status-done {
-            background: var(--status-done-bg);
-            color: var(--status-done-text);
-        }
-
-        /* AI Button */
+        /* Minimal AI Button */
         .btn-ai {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 12px;
+            background: transparent;
+            color: var(--primary-color);
+            font-size: 13px;
             font-weight: 600;
-            display: flex;
+            border: 1px solid var(--primary-soft);
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
         }
 
         .ai-result {
-            margin-top: 12px;
-            background: #F3E8FF;
-            color: #6B21A8;
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: rgba(99, 102, 241, 0.05);
             padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: var(--radius-m);
             display: flex;
             gap: 8px;
-            align-items: flex-start;
+            margin-top: 12px;
+            border-left: 3px solid #6366f1;
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--tg-theme-hint-color);
+        /* Detail View */
+        #detail-view {
+            background: var(--surface-color) !important;
         }
 
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
-            opacity: 0.5;
+        .detail-header {
+            background: var(--surface-color) !important;
+            border-bottom: none !important;
+            padding: 24px 20px !important;
         }
 
-        /* Action Sheet (Custom) */
-        .actions-sheet {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 16px 16px 0 0;
-            padding: 20px;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            animation: slideUp 0.2s ease-out;
+        .detail-hero {
+            padding: 0 20px;
+            margin-bottom: 30px;
         }
 
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 90;
+        .detail-avatar {
+            width: 60px;
+            height: 60px;
+            background: #F2F2F7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
         }
 
-        .overlay.active,
-        .actions-sheet.active {
-            display: block;
+        .detail-section {
+            padding: 0 20px;
+            margin-bottom: 30px;
         }
 
-        .sheet-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--tg-theme-bg-color);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--tg-theme-text-color);
+        .detail-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
             margin-bottom: 8px;
-            text-align: center;
+            font-weight: 600;
         }
 
-        .sheet-btn.primary {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+        .detail-value {
+            font-size: 16px;
+            color: var(--text-primary);
         }
 
-        .sheet-btn.danger {
-            color: #EF4444;
-            background: #FEF2F2;
+        .action-row {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            padding-bottom: 40px;
+            /* Safe area */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--surface-color) 80%, rgba(255, 255, 255, 0));
         }
 
-        @keyframes slideUp {
+        body.dark-mode .action-row {
+            background: linear-gradient(to top, var(--surface-color) 80%, rgba(28, 28, 30, 0));
+        }
+
+        .btn-main {
+            flex: 1;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
             from {
-                transform: translateY(100%);
+                opacity: 0;
+                transform: translateY(10px);
             }
 
             to {
+                opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        .card {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -291,15 +309,16 @@
 
     <header>
         <div class="header-top">
-            <h1>🧠 Smart CRM</h1>
-            <div id="loading-indicator" style="display:none; font-size:12px; color:var(--tg-theme-hint-color);">
-                Updating...</div>
+            <h1>Smart CRM <span style="font-size:12px; opacity:0.5; font-weight:500;">Beta</span></h1>
+            <div id="loading-indicator"
+                style="display:none; width: 8px; height: 8px; border-radius:50%; background:var(--primary-color);">
+            </div>
         </div>
 
         <div class="tabs">
-            <div class="tab active" onclick="filterList('new', this)">🔥 New (<span id="count-new">0</span>)</div>
-            <div class="tab" onclick="filterList('in_progress', this)">⏳ Active (<span id="count-active">0</span>)</div>
-            <div class="tab" onclick="filterList('completed', this)">✅ Done (<span id="count-done">0</span>)</div>
+            <div class="tab active" onclick="filterList('new', this)">New</div>
+            <div class="tab" onclick="filterList('in_progress', this)">Active</div>
+            <div class="tab" onclick="filterList('completed', this)">History</div>
         </div>
     </header>
 
@@ -307,77 +326,57 @@
         <!-- Cards injected via JS -->
     </div>
 
-    <!-- Detail View -->
+    <!-- Detail View SPA -->
     <div id="detail-view"
-        style="display:none; background: var(--tg-theme-secondary-bg-color); min-height: 100vh; position: fixed; top: 0; left: 0; right: 0; z-index: 50; overflow-y: auto;">
-        <div class="detail-header"
-            style="position: sticky; top:0; background: var(--tg-theme-bg-color); padding: 16px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);">
-            <div onclick="closeDetails()" style="font-size: 24px; cursor: pointer;">←</div>
-            <h2 style="margin: 0; font-size: 18px;">Order #<span id="detail-id"></span></h2>
-        </div>
+        style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 50; overflow-y: auto;">
 
-        <div style="padding: 20px;">
-            <!-- Client Card -->
-            <div
-                style="background: var(--tg-theme-bg-color); padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
-                <div
-                    style="background: #E2E8F0; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                    👤</div>
-                <div>
-                    <div id="detail-client" style="font-weight: 700; font-size: 16px;"></div>
-                    <a id="detail-contact" href="#"
-                        style="color: var(--tg-theme-button-color); text-decoration: none; font-size: 14px;"></a>
-                </div>
+        <div class="detail-header">
+            <div onclick="closeDetails()"
+                style="font-size: 16px; color: var(--primary-color); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+                Back
             </div>
-
-            <!-- Info Block -->
-            <h3
-                style="font-size: 14px; text-transform: uppercase; color: var(--tg-theme-hint-color); margin-bottom: 12px;">
-                Order Details</h3>
-            <div style="background: var(--tg-theme-bg-color); border-radius: 12px; overflow: hidden;">
-                <div class="detail-row" style="padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);">
-                    <div style="color: var(--tg-theme-hint-color); font-size: 13px;">Service</div>
-                    <div id="detail-service" style="font-weight: 500;"></div>
-                </div>
-                <div class="detail-row" style="padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05);">
-                    <div style="color: var(--tg-theme-hint-color); font-size: 13px;">Description</div>
-                    <div id="detail-desc" style="font-weight: 500; line-height: 1.5; margin-top: 4px;"></div>
-                </div>
-                <!-- Budget Highlight -->
-                <div class="detail-row" style="padding: 16px; background: rgba(59, 130, 246, 0.1);">
-                    <div style="color: var(--tg-theme-button-color); font-size: 13px;">Total Budget</div>
-                    <div id="detail-budget"
-                        style="font-weight: 700; font-size: 18px; color: var(--tg-theme-button-color);"></div>
-                </div>
-            </div>
-
-            <!-- AI Section (in details) -->
-            <div id="detail-ai-section" style="margin-top: 24px;"></div>
-
         </div>
 
-        <!-- Sticky Bottom Actions -->
-        <div
-            style="position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background: var(--tg-theme-secondary-bg-color); box-shadow: 0 -4px 12px rgba(0,0,0,0.05); display: flex; gap: 12px;">
-            <button onclick="updateStatus(currentDetailId, 'in_progress')" class="sheet-btn primary"
-                style="margin:0; font-size: 14px;">Accept</button>
-            <button onclick="updateStatus(currentDetailId, 'completed')" class="sheet-btn"
-                style="margin:0; background: #DCFCE7; color: #16A34A; font-size: 14px;">Complete</button>
+        <div class="detail-hero">
+            <div class="detail-avatar">👤</div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;"
+                id="detail-client"></div>
+            <a id="detail-contact" href="#"
+                style="color: var(--primary-color); text-decoration: none; font-size: 16px;"></a>
         </div>
-        <!-- Spacer for bottom bar -->
-        <div style="height: 80px;"></div>
-    </div>
 
-    <!-- Actions Sheet -->
-    <div class="overlay" onclick="closeActions()"></div>
-    <div class="actions-sheet" id="actions-sheet">
-        <h3 id="sheet-title" style="margin-top:0; margin-bottom:16px;">Order Actions</h3>
-        <button class="sheet-btn primary" onclick="openDetailsFromSheet()">📄 View Details</button>
-        <button class="sheet-btn" onclick="moveOrder('in_progress')">Move to Active ⏳</button>
-        <button class="sheet-btn" onclick="moveOrder('completed')">Mark as Done ✅</button>
-        <button class="sheet-btn danger" onclick="moveOrder('cancelled')">Cancel Order ❌</button>
-        <button class="sheet-btn" onclick="closeActions()"
-            style="margin-top:10px; background:transparent;">Cancel</button>
+        <div class="detail-section">
+            <div class="detail-label">Service Context</div>
+            <div class="detail-value" id="detail-service"></div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">Task Description</div>
+            <div class="detail-value" id="detail-desc" style="line-height: 1.5;"></div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-label">Estimated Budget</div>
+            <div class="detail-value" id="detail-budget"
+                style="font-size: 28px; font-weight: 700; color: var(--text-primary);"></div>
+        </div>
+
+        <div class="detail-section" id="detail-ai-section">
+            <!-- AI Content -->
+        </div>
+
+        <!-- Spacer -->
+        <div style="height: 100px;"></div>
+
+        <div class="action-row">
+            <button onclick="updateStatus(currentDetailId, 'in_progress')" class="btn-main btn-primary">Accept
+                Order</button>
+            <button onclick="updateStatus(currentDetailId, 'completed')" class="btn-main btn-success">Complete</button>
+        </div>
     </div>
 
     <script>
@@ -385,17 +384,13 @@
         tg.expand();
         tg.BackButton.onClick(closeDetails);
 
-        // Apply Native Theme
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
-        document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
-        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
-        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#ffffff');
+        // Apply Theme Manually to Variables
+        if (tg.colorScheme === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
 
         let allOrders = [];
         let currentFilter = 'new';
-        let selectedOrderId = null;
         let currentDetailId = null;
 
         // --- API Functions ---
@@ -403,7 +398,7 @@
         async function fetchOrders() {
             document.getElementById('loading-indicator').style.display = 'block';
             try {
-                const headers = { 'X-Telegram-User': '6066116812' }; // Demo ID
+                const headers = { 'X-Telegram-User': '6066116812' };
                 const res = await fetch('/api/bookings', { headers });
                 allOrders = await res.json();
                 renderList();
@@ -416,10 +411,10 @@
 
         async function analyzeOrder(id, event) {
             event.stopPropagation();
-            const btn = event.target.closest('button');
+            const btn = event.target.closest('.btn-ai');
             const originalText = btn.innerHTML;
             btn.innerHTML = `<span style="opacity:0.7">Thinking...</span>`;
-            btn.disabled = true;
+            // btn.disabled = true;
 
             try {
                 tg.HapticFeedback.impactOccurred('medium');
@@ -429,7 +424,7 @@
 
                 if (data.analysis) {
                     tg.HapticFeedback.notificationOccurred('success');
-                    fetchOrders(); // Refresh to show result
+                    fetchOrders();
                 }
             } catch (e) {
                 tg.HapticFeedback.notificationOccurred('error');
@@ -439,16 +434,13 @@
         }
 
         async function updateStatus(orderId, newStatus) {
-            // Optimistic UI
             const order = allOrders.find(o => o.id == orderId);
             if (order) order.status = newStatus;
 
-            // If inside details, close it or reflect change
             if (currentDetailId) {
                 tg.HapticFeedback.notificationOccurred('success');
                 closeDetails();
             }
-
             renderList();
 
             try {
@@ -458,26 +450,16 @@
                     headers,
                     body: JSON.stringify({ status: newStatus })
                 });
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        async function moveOrder(newStatus) {
-            if (!selectedOrderId) return;
-            closeActions();
-            updateStatus(selectedOrderId, newStatus);
+            } catch (e) { console.error(e); }
         }
 
         // --- Navigation ---
 
-        async function openDetails(orderId) {
+        function openDetails(orderId) {
             currentDetailId = orderId;
             const order = allOrders.find(o => o.id == orderId);
             if (!order) return;
 
-            // Fill Data
-            document.getElementById('detail-id').innerText = order.id;
             document.getElementById('detail-client').innerText = order.client;
 
             const contactLink = document.getElementById('detail-contact');
@@ -490,18 +472,16 @@
             document.getElementById('detail-desc').innerText = order.desc || order.service || "No description";
             document.getElementById('detail-budget').innerText = order.budget || "0";
 
-            // Inject AI result if exists
             const aiDiv = document.getElementById('detail-ai-section');
             if (order.ai_summary) {
-                aiDiv.innerHTML = `<div class="ai-result"><span>✨ AI Note:</span> <span>${order.ai_summary}</span></div>`;
+                aiDiv.innerHTML = `<div class="detail-label">AI Analysis</div><div class="ai-result">⚡ ${order.ai_summary}</div>`;
             } else {
-                aiDiv.innerHTML = `<button class="btn-ai" style="width:100%; justify-content:center; padding:12px;" onclick="analyzeOrder('${order.id}', event)">⚡ Analyze w/ AI</button>`;
+                aiDiv.innerHTML = ``;
             }
 
-            // Toggle View
-            document.getElementById('order-container').style.display = 'none'; // Hide list
-            document.querySelector('header').style.display = 'none';        // Hide main header
-            document.getElementById('detail-view').style.display = 'block'; // Show detail
+            document.getElementById('order-container').style.display = 'none';
+            document.querySelector('header').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'block';
 
             tg.BackButton.show();
             window.scrollTo(0, 0);
@@ -515,21 +495,10 @@
             currentDetailId = null;
         }
 
-        function openDetailsFromSheet() {
-            closeActions();
-            openDetails(selectedOrderId);
-        }
-
-
-        // --- UI Functions ---
-
         function filterList(status, tabElement) {
             currentFilter = status;
-
-            // UI Tabs
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             tabElement.classList.add('active');
-
             tg.HapticFeedback.selectionChanged();
             renderList();
         }
@@ -538,50 +507,34 @@
             const container = document.getElementById('order-container');
             container.innerHTML = '';
 
-            // Group statuses
             let filtered = [];
-            if (currentFilter === 'new') {
-                filtered = allOrders.filter(o => o.status === 'new');
-            } else if (currentFilter === 'in_progress') {
-                filtered = allOrders.filter(o => ['in_progress', 'negotiation_pending'].includes(o.status));
-            } else if (currentFilter === 'completed') {
-                filtered = allOrders.filter(o => ['completed', 'cancelled'].includes(o.status));
-            }
-
-            // Update Counts
-            document.getElementById('count-new').innerText = allOrders.filter(o => o.status === 'new').length;
-            document.getElementById('count-active').innerText = allOrders.filter(o => ['in_progress', 'negotiation_pending'].includes(o.status)).length;
-            document.getElementById('count-done').innerText = allOrders.filter(o => ['completed', 'cancelled'].includes(o.status)).length;
+            if (currentFilter === 'new') filtered = allOrders.filter(o => o.status === 'new');
+            else if (currentFilter === 'in_progress') filtered = allOrders.filter(o => ['in_progress', 'negotiation_pending'].includes(o.status));
+            else if (currentFilter === 'completed') filtered = allOrders.filter(o => ['completed', 'cancelled'].includes(o.status));
 
             if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <span class="empty-icon">📭</span>
-                        <div>No orders in this tab</div>
-                    </div>
-                `;
+                container.innerHTML = `<div class="empty-state">No orders here yet</div>`;
                 return;
             }
 
             filtered.forEach(order => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.onclick = () => openActions(order);
+                card.onclick = () => openDetails(order.id);
 
-                // Badge Logic
-                let badgeClass = 'status-new';
-                if (currentFilter === 'in_progress') badgeClass = 'status-active';
-                if (currentFilter === 'completed') badgeClass = 'status-done';
+                let badge = "";
+                // Logic for badge if needed, using text color instead
 
-                // AI Section
                 let aiHtml = '';
                 if (order.ai_summary) {
-                    aiHtml = `<div class="ai-result"><span>✨</span> <span>${order.ai_summary}</span></div>`;
+                    aiHtml = `<div class="ai-result">⚡ ${order.ai_summary}</div>`;
                 } else {
                     aiHtml = `
-                        <button class="btn-ai" onclick="analyzeOrder('${order.id}', event)">
-                            ⚡ Analyze w/ AI
-                        </button>
+                         <div style="margin-top:12px;">
+                            <button class="btn-ai" onclick="analyzeOrder('${order.id}', event)">
+                                ✨ AI Analyze
+                            </button>
+                        </div>
                     `;
                 }
 
@@ -593,33 +546,14 @@
                     <div class="card-body">
                         ${order.desc || order.service || 'No description'}
                     </div>
-                    <div class="card-footer">
-                        <div class="status-badge ${badgeClass}">${order.status}</div>
-                        ${!order.ai_summary ? aiHtml : ''}
-                    </div>
-                    ${order.ai_summary ? aiHtml : ''}
+                    ${aiHtml}
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Action Sheet Logic
-        function openActions(order) {
-            selectedOrderId = order.id;
-            document.getElementById('sheet-title').innerText = `Manage: ${order.client}`;
-            document.querySelector('.overlay').classList.add('active');
-            document.getElementById('actions-sheet').classList.add('active');
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function closeActions() {
-            document.querySelector('.overlay').classList.remove('active');
-            document.getElementById('actions-sheet').classList.remove('active');
-        }
-
-        // Init
         fetchOrders();
-        setInterval(fetchOrders, 10000); // Auto-refresh
+        setInterval(fetchOrders, 10000);
 
     </script>
 </body>
